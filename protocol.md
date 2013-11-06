@@ -77,7 +77,6 @@ The client provides his username and location:
     {
       name: 'getNearbyUsers',
       args: [{
-        username: String,
         location: {
           latitude: Number,
           longitude: Number
