@@ -28,6 +28,7 @@ A Room defines a room instance between two users:
 
     {
       id: Id,
+      users: [ UserRef ], // references to users of this room
       lastAccess: Date, // last access, per user since each user has his own Room document.
       messages: [ Message ]
     }
