@@ -1,6 +1,6 @@
-# ChaChatChat protocol
+# ChaChaChat protocol
 
-## ChaChaChat data model
+## ChaChaRoom data model
 ### Authentication settings
 
     // have a look at passports.js
@@ -17,17 +17,17 @@
         // ... are defined as virtual fields.
         nbSent: Int // number of sent messages.
       },
-      chats: [ Chat ], // chats/threads the user initiated or was invited to. Stored as embedded.
+      rooms: [ Room ], // rooms/threads the user initiated or was invited to. Stored as embedded.
       phrases: [ String ], // phrases the user might exchange
       lastSeen: Date // when the user has last been seen
     }
 
-### Chat schema
-A Chat defines a chat instance between two users:
+### Room schema
+A Room defines a room instance between two users:
 
     {
       id: Id,
-      lastAccess: Date, // last access, per user since each user has his own Chat document.
+      lastAccess: Date, // last access, per user since each user has his own Room document.
       messages: [ Message ]
     }
 
@@ -64,7 +64,7 @@ The server replies with a list of messages the users has'nt received yet:
     {
       name: 'newMessages',
       args: [{
-        chatId: Id,
+        roomId: Id,
         messages: [ Message ]
       }, ... ]
     }
@@ -112,43 +112,43 @@ The server replies with the publicly accessible attributes of the user:
       }]
     }
 
-### Getting the description of a chat:
+### Getting the description of a room:
 
-The client provides the id of the chat:
+The client provides the id of the room:
 
     {
-      name: 'getChat'
+      name: 'getRoom'
       args: [
       {
-        chatId: Id
+        roomId: Id
       }]
     }
 
-The server replies with the attributes of the chat:
+The server replies with the attributes of the room:
 
     {
-      name: 'chatDescription',
+      name: 'roomDescription',
       args: [{
-        chat: Chat
+        room: Room
       }]
     }
 
-### Initiating a chat 
-The client provides the user he wants to chat with:
+### Initiating a room
+The client provides the user he wants to room with:
 
     {
-      name: 'createChat',
+      name: 'createRoom',
       args: [{
         correspondent: String
       }]
     }
 
-The server replies with the chat id:
+The server replies with the room id:
 
     {
-      name: 'chatCreated',
+      name: 'roomCreated',
       args: [{
-        chatId: Id
+        roomId: Id
       }]
     }
 
@@ -158,7 +158,7 @@ The client provides his username and a message:
     {
       name: 'sendMessage'
       args: [{
-        chatId: Id
+        roomId: Id
         message: Message
       }]
     }
@@ -167,7 +167,7 @@ The server then pushes the message to the other client:
 
     {
       args: [{
-        chatId: Id,
+        roomId: Id,
         message: Message
       }]
     }
