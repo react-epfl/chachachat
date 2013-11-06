@@ -19,6 +19,7 @@
       },
       rooms: [ Room ], // rooms/threads the user initiated or was invited to. Stored as embedded.
       phrases: [ String ], // phrases the user might exchange
+      createdAt: Date, // when the user joined the chat network
       lastSeen: Date // when the user has last been seen
     }
 
