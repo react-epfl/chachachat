@@ -36,7 +36,7 @@ A Room defines a room instance between two users:
 ### Message schema
 
     {
-      username: String,
+      userId: Id,
       phrase: String,
       timestamp: Date // timestamp at which the message has been sent to determine if it is unread.
       location: {
@@ -95,12 +95,12 @@ The server replies with a list of users (given as the publicly accessible attrib
 
 ### Getting a user's profile
 
-The client provides the username of the user:
+The client provides the userId of the user:
 
     {
       name: 'getUser'
       args: [{
-        username: String
+        userId: Id
       }]
     }
 
