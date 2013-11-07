@@ -40,8 +40,8 @@ A Room defines a room instance between two users:
       phrase: String,
       timestamp: Date // timestamp at which the message has been sent to determine if it is unread.
       location: {
-        latitude: Number,
-        longitude: Number
+        lat: Number,
+        lng: Number
       }
     }
 
@@ -78,8 +78,8 @@ The client provides his location:
       name: 'getNearbyUsers',
       args: [{
         location: {
-          latitude: Number,
-          longitude: Number
+          lat: Number,
+          lng: Number
         }
       }];
     }
