@@ -154,7 +154,7 @@ The server replies with the room id:
     }
 
 ### Sending a message
-The client provides his username and a message:
+The client provides a message:
 
     {
       name: 'sendMessage'
@@ -167,8 +167,19 @@ The client provides his username and a message:
 The server then pushes the message to the other client:
 
     {
+      name: 'newMessage'
       args: [{
         roomId: Id,
         message: Message
+      }]
+    }
+
+After sending the message to the other client the server should confirm the message has been sent:
+
+    {
+      name: 'messageSent',
+      args: [{
+        roomId: Id,
+        meesageId: Id
       }]
     }
