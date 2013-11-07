@@ -72,7 +72,7 @@ The server replies with a list of messages the users has'nt received yet:
     }
 
 ### Finding nearby users
-The client provides his username and location:
+The client provides his location:
 
     {
       name: 'getNearbyUsers',
