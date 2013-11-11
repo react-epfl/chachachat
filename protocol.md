@@ -17,7 +17,7 @@
         // ... are defined as virtual fields.
         nbSent: Int // number of sent messages.
       },
-      rooms: [ Room ], // rooms/threads the user initiated or was invited to. Stored as embedded.
+      rooms: [ RoomRef ], // rooms/threads the user initiated or was invited to.
       phrases: [ String ], // phrases the user might exchange
       createdAt: Date, // when the user joined the chat network
       lastSeen: Date // when the user has last been seen
@@ -28,7 +28,7 @@ A Room defines a room instance between two users:
 
     {
       id: Id,
-      users: [ UserRef ], // references to users of this room
+      members: [ UserRef ], // references to users of this room
       lastAccess: Date, // last access, per user since each user has his own Room document.
       messages: [ Message ]
     }
@@ -36,10 +36,10 @@ A Room defines a room instance between two users:
 ### Message schema
 
     {
-      userId: Id,
+      author: Id,
       phrase: String,
       timestamp: Date // timestamp at which the message has been sent to determine if it is unread.
-      location: {
+      loc: {
         lat: Number,
         lng: Number
       }
@@ -57,7 +57,7 @@ A Room defines a room instance between two users:
 
 ### Logging in
 
-The client provides his username and password:
+The client provides his username and password and the time he last checked for/received messages:
 
     // have a look at passport.js
 
@@ -77,7 +77,7 @@ The client provides his location:
     {
       name: 'getNearbyUsers',
       args: [{
-        location: {
+        loc: {
           lat: Number,
           lng: Number
         }
@@ -128,7 +128,7 @@ The client provides the id of the room:
 The server replies with the attributes of the room:
 
     {
-      name: 'roomDescription',
+      name: 'roomProfile',
       args: [{
         room: Room
       }]
@@ -180,6 +180,6 @@ After sending the message to the other client the server should confirm the mess
       name: 'messageSent',
       args: [{
         roomId: Id,
-        meesageId: Id
+        messageId: Id
       }]
     }
