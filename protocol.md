@@ -3,7 +3,7 @@
 ## ChaChaRoom data model
 ### Authentication settings
 
-    // have a look at passports.js
+Authentication happens over https, using a POST /login method. Parameters are username and password.
 
 ### User schema
 
