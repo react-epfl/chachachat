@@ -15,6 +15,7 @@ var fs = require('fs');
 var path = require('path');
 
 var User = require('./models/user').model;
+var routes = require('./routes');
 
 var app = express();
 
@@ -110,14 +111,7 @@ io.set('authorization', passportSocketIO.authorize({
   store: sessionStore
 }));
 
-io.on('connection', function(socket) {
-  var user = socket.handshake.user;
-
-  socket.on('hello', function(data) {
-    socket.emit('hi ' + user.username, function() {
-    });
-  })
-});
+io.on('connection', routes.socketio.onConnection);
 
 server.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
