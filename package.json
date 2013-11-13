@@ -1,0 +1,23 @@
+{
+  "name": "chachachat",
+  "version": "0.1.0",
+  "description": "ChaChaChat - a instant messaging application",
+  "main": "chachachatsrv.js",
+  "private": true,
+  "scripts": {
+    "start": "node chachachat.js"
+  },
+  "dependencies": {
+    "express": "3.4.2",
+    "jade": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/react-epfl/chachachat.git"
+  },
+  "author": "Andrii Vozniuk, Bruno Didot",
+  "license": "Copyrighted by Andrii Vozniuk",
+  "bugs": {
+    "url": "https://github.com/react-epfl/chachachat/issues"
+  }
+}
