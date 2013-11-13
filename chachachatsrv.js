@@ -4,9 +4,11 @@
  */
 
 var express = require('express');
+var socketio = require('socket.io');
 var RedisStore = require('connect-redis')(express);
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var passportSocketIO = require('passport.socketio');
 var https = require('https');
 var fs = require('fs');
 var path = require('path');
@@ -91,6 +93,25 @@ var credentials = {
 };
 
 var server = https.createServer(credentials, app);
+
+var io = socketio.listen(server);
+
+io.set('authorization', passportSocketIO.authorize({
+  cookieParser: express.cookieParser,
+  key: 'connect.sid',
+  secret: sessionSecret,
+  store: sessionStore
+}));
+
+io.on('connection', function(socket) {
+  console.log('user connected to socket.io');
+  socket.on('hello', function(data) {
+    console.log('user said hello');
+    socket.emit('hi', function() {
+      console.log('replying with hi');
+    })
+  })
+});
 
 server.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
