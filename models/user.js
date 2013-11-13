@@ -20,7 +20,11 @@ userSchema.method('validatePassword', function(pw) {
   return this.password === pw;
 });
 
-var User = mongoose.model('users', userSchema);
+userSchema.statics.findByUsername = function(username, cb) {
+  this.find({ username: username }, cb);
+};
+
+var User = mongoose.model('User', userSchema);
 
 module.exports = {
   schema: userSchema,
