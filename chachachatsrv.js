@@ -6,12 +6,15 @@
 var express = require('express');
 var socketio = require('socket.io');
 var RedisStore = require('connect-redis')(express);
+var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var passportSocketIO = require('passport.socketio');
 var https = require('https');
 var fs = require('fs');
 var path = require('path');
+
+var User = require('./models/user').model;
 
 var app = express();
 
@@ -36,22 +39,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    done(null, {
-      username: 'dupont',
-      password: 'aignan',
-      email: 'test@gmail.com',
-      id: 'dupontID'
+    User.findOne({ username: username }, function(err, user) {
+      if (err) { return done(err); }
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+      if (!user.validatePassword(password)) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
     });
-    // User.findOne({ username: username }, function(err, user) {
-    //   if (err) { return done(err); }
-    //   if (!user) {
-    //     return done(null, false, { message: 'Incorrect username.' });
-    //   }
-    //   if (!user.validPassword(password)) {
-    //     return done(null, false, { message: 'Incorrect password.' });
-    //   }
-    //   return done(null, user);
-    // });
   }
 ));
 
@@ -60,15 +57,12 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-  // User.findById(id, function(err, user) {
-  //   done(err, user);
-  // });
-  done(null, { username: 'dupont',
-    password: 'aignan',
-    email: 'test@gmail.com',
-    id: 'dupontID'
+  User.findById(id, function(err, user) {
+    done(err, user);
   });
 });
+
+mongoose.connect('mongodb://localhost/chachachat');
 
 // development only
 if ('development' == app.get('env')) {
@@ -87,6 +81,19 @@ app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login.html'
 }));
 
+app.post('/register', function(req, res) {
+  //TODO add some field filtering
+  var user = new User(req.body);
+  user.save(function(err) {
+    if (err) {
+      console.log('User could not be saved');
+      res.status(500).send(err);
+    }
+
+    res.redirect('/login.html');
+  })
+});
+
 var credentials = {
   key: fs.readFileSync('config/chachachat-key.pem'),
   cert: fs.readFileSync('config/chachachat-cert.pem')
@@ -104,12 +111,11 @@ io.set('authorization', passportSocketIO.authorize({
 }));
 
 io.on('connection', function(socket) {
-  console.log('user connected to socket.io');
+  var user = socket.handshake.user;
+
   socket.on('hello', function(data) {
-    console.log('user said hello');
-    socket.emit('hi', function() {
-      console.log('replying with hi');
-    })
+    socket.emit('hi ' + user.username, function() {
+    });
   })
 });
 
