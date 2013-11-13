@@ -9,7 +9,8 @@ Authentication happens over https, using a POST /login method. Parameters are us
 
     {
       username: String, // unique, see how it is stored in passport.js
-      password: Salted, hashed password,
+      password: String, // Salted, hashed password,
+      salt: String, // password salt
       profile: {
       }
       achievements: [ Achievement ],
@@ -27,10 +28,9 @@ Authentication happens over https, using a POST /login method. Parameters are us
 A Room defines a room instance between two users:
 
     {
-      id: Id,
       members: [ UserRef ], // references to users of this room
+      messages: [ Message ],
       lastAccess: Date, // last access, per user since each user has his own Room document.
-      messages: [ Message ]
     }
 
 ### Message schema
@@ -38,7 +38,7 @@ A Room defines a room instance between two users:
     {
       author: Id,
       phrase: String,
-      timestamp: Date // timestamp at which the message has been sent to determine if it is unread.
+      createdAt: Date // timestamp at which the message has been sent to determine if it is unread.
       loc: {
         lat: Number,
         lng: Number
@@ -135,7 +135,7 @@ The server replies with the attributes of the room:
     }
 
 ### Initiating a room
-The client provides the user he wants to room with:
+The client provides the user he wants to chat with:
 
     {
       name: 'createRoom',
