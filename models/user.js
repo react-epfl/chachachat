@@ -21,7 +21,7 @@ userSchema.method('validatePassword', function(pw) {
 });
 
 userSchema.statics.findByUsername = function(username, cb) {
-  this.find({ username: username }, cb);
+  this.findOne({ username: username }, cb);
 };
 
 var User = mongoose.model('User', userSchema);
