@@ -13,13 +13,22 @@ var passportSocketIO = require('passport.socketio');
 var https = require('https');
 var fs = require('fs');
 var path = require('path');
-
+var winston = require('winston');
 var User = require('./models/user').model;
 var routes = require('./routes');
 
 var app = express();
 
 // all environments
+l = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)({
+      timestamp: true,
+      level: 'debug'
+    })
+  ]
+});
+
 var sessionSecret = 'chachachat-application';
 var sessionStore = new RedisStore({
   host: 'localhost'
@@ -87,7 +96,7 @@ app.post('/register', function(req, res) {
   var user = new User(req.body);
   user.save(function(err) {
     if (err) {
-      console.log('User could not be saved');
+      l.error('User could not be saved');
       res.status(500).send(err);
     }
 
@@ -114,5 +123,5 @@ io.set('authorization', passportSocketIO.authorize({
 io.on('connection', routes.socketio.onConnection);
 
 server.listen(app.get('port'), function() {
-  console.log('Express server listening on port ' + app.get('port'));
+  l.log('Express server listening on port ' + app.get('port'));
 });

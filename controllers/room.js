@@ -7,10 +7,10 @@ exports.onCreateRoom = function(socket) {
 
     User.findByUsername(correspondentName, function(err, correspondent) {
       if (err) {
-        console.log('Could not search user ' + err);
+        l.error('Could not search user ' + err);
         return;
       } else if (! correspondent) {
-        console.log('User ' + correspondentName + ' not found');
+        l.warn('User ' + correspondentName + ' not found');
         return;
       }
 
@@ -20,7 +20,8 @@ exports.onCreateRoom = function(socket) {
 
       room.save(function(err) {
         if (err) {
-          return console.log('Could not save room ' + err);
+          l.error('Could not save room ' + err);
+          return;
         }
 
         socket.emit('roomCreated', {

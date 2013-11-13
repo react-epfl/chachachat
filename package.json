@@ -5,7 +5,7 @@
   "main": "chachachatsrv.js",
   "private": true,
   "scripts": {
-    "start": "node chachachat.js"
+    "start": "node chachachatsrv.js"
   },
   "dependencies": {
     "express": "3.4.2",
@@ -15,7 +15,8 @@
     "passport-local": "0.1.6",
     "jade": "*",
     "connect-redis": "1.4.5",
-    "passport.socketio": "1.2.1"
+    "passport.socketio": "1.2.1",
+    "winston": "~0.7.2"
   },
   "repository": {
     "type": "git",
