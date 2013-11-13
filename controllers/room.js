@@ -15,7 +15,7 @@ exports.onCreateRoom = function(socket) {
       }
 
       var room = new Room({
-        members: [ correspondent.id, socket.handshake.user.id ],
+        members: [ { userId: correspondent.id }, { userId: socket.handshake.user.id } ],
       });
 
       room.save(function(err) {

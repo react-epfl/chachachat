@@ -3,14 +3,16 @@ var messageSchema = require('./message').schema;
 
 var roomSchema = mongoose.Schema({
   members: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    lastAccess: {
+      type: Date,
+      default: Date.now
+    }
   }],
   messages: [ messageSchema ],
-  lastAccess: {
-    type: Date,
-    default: Date.now
-  }
 });
 
 var Room = mongoose.model('Room', roomSchema);
