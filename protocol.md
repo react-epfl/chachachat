@@ -113,27 +113,6 @@ The server replies with the publicly accessible attributes of the user:
       }]
     }
 
-### Getting the description of a room:
-
-The client provides the id of the room:
-
-    {
-      name: 'getRoom'
-      args: [
-      {
-        roomId: RoomId
-      }]
-    }
-
-The server replies with the attributes of the room:
-
-    {
-      name: 'roomProfile',
-      args: [{
-        room: Room
-      }]
-    }
-
 ### Initiating a room
 The client provides the user he wants to chat with:
 
