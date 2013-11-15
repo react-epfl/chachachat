@@ -51,7 +51,7 @@ A Room defines a room instance between two users:
     }
 
 ## Websocket messages
-### Register
+### Registration
 
     // have a look at passport.js, username, password
 
