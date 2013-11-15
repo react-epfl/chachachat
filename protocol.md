@@ -18,7 +18,6 @@ Authentication happens over https, using a POST /login method. Parameters are us
         // ... are defined as virtual fields.
         nbSent: Int // number of sent messages.
       },
-      rooms: [ RoomId ], // rooms/threads the user initiated or was invited to.
       vocabulary: [ String ], // set of words the user might exchange
       createdAt: Date, // when the user joined the chat network
       lastSeen: Date // when the user has last been seen
