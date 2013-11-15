@@ -19,7 +19,7 @@ Authentication happens over https, using a POST /login method. Parameters are us
         nbSent: Int // number of sent messages.
       },
       rooms: [ RoomId ], // rooms/threads the user initiated or was invited to.
-      phrases: [ String ], // phrases the user might exchange
+      vocabulary: [ String ], // set of words the user might exchange
       createdAt: Date, // when the user joined the chat network
       lastSeen: Date // when the user has last been seen
     }
@@ -36,7 +36,7 @@ A Room defines a room instance between two users:
 
     {
       author: UserId,
-      phrases: [ String ], // the three phrases of the schema
+      vocabulary: [ String ], // the three phrases of the schema
       createdAt: Date, // timestamp at which the message has been sent to determine if it is unread.
       loc: {
         lat: Number,
@@ -45,9 +45,9 @@ A Room defines a room instance between two users:
       color: String // HTML color code
     }
 
-### Phrases proposed by the server
+### Vocabulary proposed by the server
     {
-      phrases: [ String ]
+      vocabulary: [ String ]
     }
 
 ## Websocket messages
