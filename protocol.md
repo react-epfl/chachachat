@@ -28,7 +28,7 @@ Authentication happens over https, using a POST /login method. Parameters are us
 A Room defines a room instance between two users:
 
     {
-      members: [ { userId: UserId, lastAccess: Date } ], // references to users of this room, with their last access
+      memberships: [ { userId: UserId, lastAccess: Date } ], // references to users of this room, with their last access
       messages: [ Message ]
     }
 
