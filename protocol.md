@@ -113,7 +113,7 @@ The server replies with the publicly accessible attributes of the user:
       }]
     }
 
-### Initiating a room
+### Creating a room
 The client provides the user he wants to chat with:
 
     {
