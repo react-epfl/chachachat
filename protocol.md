@@ -9,7 +9,7 @@ Authentication happens over https, using a POST /login method. Parameters are us
 
     {
       username: String, // unique, see how it is stored in passport.js
-      password: String, // Salted, hashed password,
+      hashedPassword: String, // Salted, hashed password,
       salt: String, // password salt
       profile: {
       }
@@ -18,7 +18,7 @@ Authentication happens over https, using a POST /login method. Parameters are us
         // ... are defined as virtual fields.
         nbSent: Int // number of sent messages.
       },
-      rooms: [ RoomRef ], // rooms/threads the user initiated or was invited to.
+      rooms: [ RoomId ], // rooms/threads the user initiated or was invited to.
       phrases: [ String ], // phrases the user might exchange
       createdAt: Date, // when the user joined the chat network
       lastSeen: Date // when the user has last been seen
@@ -28,14 +28,14 @@ Authentication happens over https, using a POST /login method. Parameters are us
 A Room defines a room instance between two users:
 
     {
-      members: [ { userId: UserRef, lastAccess: Date } ], // references to users of this room, with their last access
+      members: [ { userId: UserId, lastAccess: Date } ], // references to users of this room, with their last access
       messages: [ Message ]
     }
 
 ### Message schema
 
     {
-      author: Id,
+      author: UserId,
       phrase: String,
       createdAt: Date // timestamp at which the message has been sent to determine if it is unread.
       loc: {
@@ -60,12 +60,12 @@ The client provides his username and password and the time he last checked for/r
 
     // have a look at passport.js
 
-The server replies with a list of messages the users has'nt received yet:
+The server replies with a list of messages the users hasn't received yet:
 
     {
       name: 'newMessages',
       args: [{
-        roomId: Id,
+        roomId: RoomId,
         messages: [ Message ]
       }, ... ]
     }
@@ -94,12 +94,12 @@ The server replies with a list of users (given as the publicly accessible attrib
 
 ### Getting a user's profile
 
-The client provides the userId of the user:
+The client provides the username of the user:
 
     {
       name: 'getUser'
       args: [{
-        userId: Id
+        username: String
       }]
     }
 
@@ -108,7 +108,7 @@ The server replies with the publicly accessible attributes of the user:
     {
       name: 'userProfile',
       args: [{
-        user: User  
+        user: User
       }]
     }
 
@@ -120,7 +120,7 @@ The client provides the id of the room:
       name: 'getRoom'
       args: [
       {
-        roomId: Id
+        roomId: RoomId
       }]
     }
 
@@ -148,7 +148,7 @@ The server replies with the room id:
     {
       name: 'roomCreated',
       args: [{
-        roomId: Id
+        roomId: RoomId
       }]
     }
 
@@ -168,7 +168,7 @@ The server then pushes the message to the other client:
     {
       name: 'newMessage'
       args: [{
-        roomId: Id,
+        roomId: RoomId,
         message: Message
       }]
     }
@@ -178,7 +178,7 @@ After sending the message to the other client the server should confirm the mess
     {
       name: 'messageSent',
       args: [{
-        roomId: Id,
-        messageId: Id
+        roomId: RoomId,
+        messageId: MessageId
       }]
     }
