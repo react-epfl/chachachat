@@ -92,16 +92,16 @@ app.post('/login', passport.authenticate('local', {
 }));
 
 app.post('/register', function(req, res) {
-  //TODO add some field filtering
-  var user = new User(req.body);
-  user.save(function(err) {
+  User.register(req.body, function(err) {
     if (err) {
       l.error('User could not be saved');
       res.status(500).send(err);
+      return;
     }
 
+    l.verbose('User ' + req.body.username + ' registered successfully');
     res.redirect('/login.html');
-  })
+  });
 });
 
 var credentials = {
