@@ -182,3 +182,14 @@ After sending the message to the other client the server should confirm the mess
         messageId: MessageId
       }]
     }
+
+### In case of errors
+All messages include an HTTP-like status code in case of errors, along with an error message. In case of errors, only these two fields might be present:
+
+    {
+      name: name of the query
+      args: [{
+        status: Integer,
+        err: String
+      }]
+    }
