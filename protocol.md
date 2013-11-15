@@ -36,7 +36,7 @@ A Room defines a room instance between two users:
 
     {
       author: UserId,
-      phrase: String,
+      phrases: [ String ], // the three phrases of the schema
       createdAt: Date, // timestamp at which the message has been sent to determine if it is unread.
       loc: {
         lat: Number,
