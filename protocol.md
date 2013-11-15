@@ -37,11 +37,12 @@ A Room defines a room instance between two users:
     {
       author: UserId,
       phrase: String,
-      createdAt: Date // timestamp at which the message has been sent to determine if it is unread.
+      createdAt: Date, // timestamp at which the message has been sent to determine if it is unread.
       loc: {
         lat: Number,
         lng: Number
-      }
+      },
+      color: String // HTML color code
     }
 
 ### Phrases proposed by the server
