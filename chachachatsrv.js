@@ -20,7 +20,7 @@ var express = require('express')
 var app = express();
 
 // all environments
-l = new (winston.Logger)({
+global.log = new (winston.Logger)({
   transports: [
     new (winston.transports.Console)({
       timestamp: true,
@@ -94,12 +94,12 @@ app.post('/login', passport.authenticate('local', {
 app.post('/register', function(req, res) {
   User.register(req.body, function(err) {
     if (err) {
-      l.error('User could not be saved');
+      log.error('User could not be saved');
       res.status(500).send(err);
       return;
     }
 
-    l.verbose('User ' + req.body.username + ' registered successfully');
+    log.verbose('User ' + req.body.username + ' registered successfully');
     res.redirect('/login.html');
   });
 });
@@ -123,5 +123,5 @@ io.set('authorization', passportSocketIO.authorize({
 io.on('connection', routes.socketio.onConnection);
 
 server.listen(app.get('port'), function() {
-  l.log('Express server listening on port ' + app.get('port'));
+  log.log('Express server listening on port ' + app.get('port'));
 });
