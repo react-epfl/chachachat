@@ -5,7 +5,7 @@
   "main": "chachachatsrv.js",
   "private": true,
   "scripts": {
-    "start": "node chachachatsrv.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "latest",
