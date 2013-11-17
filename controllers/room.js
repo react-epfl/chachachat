@@ -1,5 +1,6 @@
-var Room = require('../models/room.js').model;
-var User = require('../models/user.js').model;
+var models = require('../models')
+  , Room = models.Room
+  , User = models.User;
 
 exports.onCreateRoom = function(socket) {
   return function(data) {

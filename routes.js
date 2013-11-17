@@ -1,6 +1,4 @@
-var controller = {
-  room: require('./controllers/room')
-}
+var controller = require('./controllers');
 
 module.exports = {
   socketio: {

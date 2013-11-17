@@ -1,7 +1,8 @@
-var mongoose = require('mongoose');
-var crypto = require('crypto');
+var mongoose = require('mongoose')
+  , Schema = mongoose.Schema
+  , crypto = require('crypto');
 
-var userSchema = mongoose.Schema({
+var userSchema = new Schema({
   username: {
     type: String,
     unique: true

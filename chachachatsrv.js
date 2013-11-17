@@ -3,19 +3,19 @@
  * Module dependencies.
  */
 
-var express = require('express');
-var socketio = require('socket.io');
-var RedisStore = require('connect-redis')(express);
-var mongoose = require('mongoose');
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-var passportSocketIO = require('passport.socketio');
-var https = require('https');
-var fs = require('fs');
-var path = require('path');
-var winston = require('winston');
-var User = require('./models/user').model;
-var routes = require('./routes');
+var express = require('express')
+  , socketio = require('socket.io')
+  , RedisStore = require('connect-redis')(express)
+  , mongoose = require('mongoose')
+  , passport = require('passport')
+  , LocalStrategy = require('passport-local').Strategy
+  , passportSocketIO = require('passport.socketio')
+  , https = require('https')
+  , fs = require('fs')
+  , path = require('path')
+  , winston = require('winston')
+  , User = require('./models').User
+  , routes = require('./routes');
 
 var app = express();
 

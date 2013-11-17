@@ -1,10 +1,11 @@
-var mongoose = require('mongoose');
-var messageSchema = require('./message').schema;
+var mongoose = require('mongoose')
+  , Schema = mongoose.Schema
+  , messageSchema = require('./message').schema;
 
-var roomSchema = mongoose.Schema({
+var roomSchema = new Schema({
   members: [{
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.ObjectId,
       ref: 'User'
     },
     lastAccess: {
