@@ -2,17 +2,15 @@ var models = require('../models')
   , Room = models.Room
   , User = models.User;
 
-exports.onCreateRoom = function(socket) {
+exports.onCreateRoom = function(socket, event) {
   return function(data) {
     var correspondentName = data.correspondent;
 
     User.findByUsername(correspondentName, function(err, correspondent) {
       if (err) {
-        log.error('Could not search user ' + err);
-        return;
+        return socket.error500(event, 'Could not search for user ' + correspondentName, err);
       } else if (! correspondent) {
-        log.warn('User ' + correspondentName + ' not found');
-        return;
+        return socket.error404(event, 'User ' + correspondentName + ' not found');
       }
 
       var room = new Room({
