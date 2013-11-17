@@ -10,6 +10,7 @@ module.exports = {
       report.addErrorHandling(socket);
 
       socket.on('createRoom', controller.room.onCreateRoom(socket, 'createRoom'));
+      socket.on('sendMessage', controller.room.onSendMessage(socket, 'sendMessage'));
     }
   }
 };

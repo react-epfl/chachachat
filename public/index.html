@@ -11,7 +11,15 @@
     var socket = io.connect('https://localhost:3000');
     socket.emit('createRoom', { correspondent: 'alice' });
     socket.on('roomCreated', function(data) {
-      console.log('user replied with hi');
+      var roomId = data.roomId;
+      console.log('The room was created: ' + roomId);
+      socket.emit('sendMessage', {
+        roomId: roomId,
+        message: {
+          vocabulary: [ 'good', 'morning', 'alice' ],
+          color: "#144855"
+        }
+      });
     });
   </script>
  </body>
