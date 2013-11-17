@@ -8,15 +8,15 @@
     "start": "node chachachatsrv.js"
   },
   "dependencies": {
-    "express": "3.4.2",
-    "mongoose": "3.6.20",
-    "socket.io": "0.9.16",
-    "passport": "0.1.17",
-    "passport-local": "0.1.6",
-    "jade": "*",
-    "connect-redis": "1.4.5",
-    "passport.socketio": "1.2.1",
-    "winston": "~0.7.2"
+    "express": "latest",
+    "mongoose": "latest",
+    "socket.io": "latest",
+    "passport": "latest",
+    "passport-local": "latest",
+    "jade": "latest",
+    "connect-redis": "latest",
+    "passport.socketio": "latest",
+    "winston": "latest"
   },
   "repository": {
     "type": "git",
