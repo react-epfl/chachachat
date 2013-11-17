@@ -6,7 +6,7 @@ var messageSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   },
-  phrase: [ String ],
+  vocabulary: [ String ],
   createdAt: {
     type: Date,
     default: Date.now
@@ -14,7 +14,8 @@ var messageSchema = new Schema({
   loc: {
     lat: Number,
     lng: Number
-  }
+  },
+  color: String
 });
 
 var Message = mongoose.model('Message', messageSchema);

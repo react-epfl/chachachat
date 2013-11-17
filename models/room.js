@@ -3,7 +3,7 @@ var mongoose = require('mongoose')
   , messageSchema = require('./message').schema;
 
 var roomSchema = new Schema({
-  members: [{
+  memberships: [{
     userId: {
       type: Schema.ObjectId,
       ref: 'User'

@@ -7,7 +7,7 @@ var userSchema = new Schema({
     type: String,
     unique: true
   },
-  password: String,
+  hashedPassword: String,
   salt: String,
   profile: {
   },
@@ -15,11 +15,15 @@ var userSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  lastSeen: {
+    type: Date,
+    default: Date.now
   }
 });
 
 userSchema.method('validatePassword', function(pw, cb) {
-  return this.password === crypto.pbkdf2Sync(pw, this.salt, 16384, 256).toString('base64');
+  return this.hashedPassword === crypto.pbkdf2Sync(pw, this.salt, 16384, 256).toString('base64');
 });
 
 userSchema.statics.findByUsername = function(username, cb) {
@@ -34,7 +38,7 @@ userSchema.statics.register = function(user, cb) {
     var user = new User({
       username: user.username,
       salt: salt,
-      password: hashedpw
+      hashedPassword: hashedpw
     });
 
     user.save(cb);
