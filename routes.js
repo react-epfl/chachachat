@@ -1,13 +1,13 @@
 var controller = require('./controllers')
-  , reporter = require('./reporter');
+  , report = require('./reporter');
 
 module.exports = {
   socketio: {
     onConnection: function(socket) {
       var user = socket.handshake.user;
-      log.verbose('user ' + user.username + ' connected through websocket.');
+      report.verbose('user ' + user.username + ' connected through websocket.');
 
-      reporter.addErrorHandling(socket);
+      report.addErrorHandling(socket);
 
       socket.on('createRoom', controller.room.onCreateRoom(socket, 'createRoom'));
     }

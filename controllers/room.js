@@ -1,6 +1,7 @@
 var models = require('../models')
   , Room = models.Room
-  , User = models.User;
+  , User = models.User
+  , report = require('../reporter');
 
 exports.onCreateRoom = function(socket, event) {
   return function(data) {
@@ -19,7 +20,7 @@ exports.onCreateRoom = function(socket, event) {
 
       room.save(function(err) {
         if (err) {
-          log.error('Could not save room ' + err);
+          report.error('Could not save room ' + err);
           return;
         }
 
