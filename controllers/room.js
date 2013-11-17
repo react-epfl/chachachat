@@ -20,8 +20,7 @@ exports.onCreateRoom = function(socket, event) {
 
       room.save(function(err) {
         if (err) {
-          report.error('Could not save room ' + err);
-          return;
+          return socket.error500(event, 'Could not save room', err);
         }
 
         socket.emit('roomCreated', {
