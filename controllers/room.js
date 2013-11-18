@@ -51,5 +51,30 @@ module.exports = {
         });
       });
     }
+  },
+
+  onFetchMessages: function(socket, event) {
+    return function(data) {
+      var userId = socket.handshake.user._id;
+      var since = data.since;
+
+      Room.messagesSince(userId, since, function(err, messagesByRoom) {
+        if (err) {
+          return socket.error500(event, 'Could not search in room collection', err);
+        }
+        if (! messagesByRoom) {
+          messagesByRoom = [];
+        }
+
+        messagesByRoom.map(function(messages) {
+          return {
+            roomId: messages._id,
+            messages: messages.messages
+          };
+        });
+
+        socket.emit('newMessages', messagesByRoom);
+      });
+    }
   }
 };
