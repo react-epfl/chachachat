@@ -1,10 +1,6 @@
 # ChaChaChat protocol
 
 ## ChaChaRoom data model
-### Authentication settings
-
-Authentication happens over https, using a POST /login method. Parameters are username and password.
-
 ### User schema
 
     {
@@ -49,18 +45,18 @@ A Room defines a room instance between two users:
       vocabulary: [ String ]
     }
 
+## Authentication
+
+Logging in happens over https, using a POST /login method. Parameters are username and password.
+
 ## Websocket messages
 ### Registration
 
     // have a look at passport.js, username, password
 
-### Logging in
+### Upon connection to socket.io
 
-The client provides his username and password and the time he last checked for/received messages:
-
-    // have a look at passport.js
-
-The server replies with a list of messages the users hasn't received yet:
+The server provides a list of messages the users hasn't received yet:
 
     {
       name: 'newMessages',
