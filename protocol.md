@@ -66,11 +66,25 @@ The server provides a list of messages the users hasn't received yet:
       }, ... ]
     }
 
-### Finding nearby users
+### Finding users
+
+#### By name
+
+The client provides the name:
+
+    {
+      name: 'findUser',
+      args: [{
+        name: String
+      }];
+    }
+
+#### By location
+
 The client provides his location:
 
     {
-      name: 'getNearbyUsers',
+      name: 'findNearbyUsers',
       args: [{
         loc: {
           lat: Number,
@@ -79,10 +93,10 @@ The client provides his location:
       }];
     }
 
-The server replies with a list of users (given as the publicly accessible attributes of users) within a server-defined range:
+The server replies with a list of users (given as the publicly accessible attributes of users), eventually within a server-defined range:
 
     {
-      name: 'nearbyUsers',
+      name: 'users',
       args: [{
         users: User
       }];
