@@ -5,5 +5,5 @@ Chachachat is an instant messaging application, where the users can communicate 
 
 ## Protocol
 
-Chachachat used a websocket based protocol.
+Chachachat used a socket.io based protocol.
 Details can be found in protocol.md
