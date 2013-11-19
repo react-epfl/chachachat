@@ -109,7 +109,7 @@ The client provides the username of the user:
     {
       name: 'getUser'
       args: [{
-        username: String
+        userId: UserRef
       }]
     }
 
@@ -128,7 +128,7 @@ The client provides the user he wants to chat with:
     {
       name: 'createRoom',
       args: [{
-        correspondent: String
+        correspondentsId: [ UserRef ]
       }]
     }
 
