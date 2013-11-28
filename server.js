@@ -77,16 +77,36 @@ app.get('/', function(req, res, next) {
     res.redirect('/login.html');
 });
 
-app.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login.html'
-}));
+app.post('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) {
+      return res.status(500).sendfile('public/login.html');
+    }
+    if (! user) {
+      return res.status(404).sendfile('public/login.html');
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        return res.status(500).sendfile('public/login.html');
+      }
+      return res.redirect('/');
+    });
+  })(req, res, next);
+});
 
 app.post('/register', function(req, res) {
   User.register(req.body, function(err) {
     if (err) {
-      report.error('User could not be saved');
-      res.status(500).send(err);
+      if (err.code === 11000) {
+        res.status(409).send({
+          err: "Someone already has that username"
+        });
+      } else {
+        report.error('User could not be saved');
+        res.status(500).send({
+          err: "Internal server error"
+        });
+      }
       return;
     }
 
