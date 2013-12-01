@@ -1,3 +1,4 @@
 module.exports = {
-  room: require('./room')
+  room: require('./room'),
+  user: require('./user')
 };

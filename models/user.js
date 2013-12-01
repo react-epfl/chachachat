@@ -26,9 +26,20 @@ userSchema.method('validatePassword', function(pw, cb) {
   return this.hashedPassword === crypto.pbkdf2Sync(pw, this.salt, 16384, 256).toString('base64');
 });
 
+userSchema.methods.publicData = function() {
+  return {
+    id: this._id,
+    name: this.username
+  };
+}
+
 userSchema.statics.findByUsername = function(username, cb) {
   this.findOne({ username: username }, cb);
 };
+
+userSchema.statics.whereNameContains = function(name, cb) {
+  User.find({'username' : {$regex : '.*' + name + '*'}}, cb);
+}
 
 userSchema.statics.register = function(user, cb) {
   try {
