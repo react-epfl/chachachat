@@ -77,7 +77,7 @@ app.get('/', function(req, res, next) {
     res.redirect('/login.html');
 });
 
-app.post('/login', function(req, res, next) {
+var apiLogin = function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err) {
       return res.status(500).sendfile('public/login.html');
@@ -89,12 +89,15 @@ app.post('/login', function(req, res, next) {
       if (err) {
         return res.status(500).sendfile('public/login.html');
       }
+      report.verbose('User ' + req.body.username + ' logged in successfully');
       return res.redirect('/');
     });
   })(req, res, next);
-});
+};
 
-app.post('/register', function(req, res) {
+app.post('/login', apiLogin);
+
+app.post('/register', function(req, res, next) {
   User.register(req.body, function(err) {
     if (err) {
       if (err.code === 11000) {
@@ -111,7 +114,8 @@ app.post('/register', function(req, res) {
     }
 
     report.verbose('User ' + req.body.username + ' registered successfully');
-    res.redirect('/login.html');
+
+    apiLogin(req, res, next);
   });
 });
 
