@@ -65,6 +65,40 @@ roomSchema.statics.messagesSince = function (userId, since, cb) {
   .exec(cb);
 };
 
+/*
+roomSchema.statics.createRoom = function(userIds, cb) {
+  var matches = userIds.map(function(userId) {
+    return { "$elemMatch": { userId: userId } }
+  });
+
+  Room.find( { memberships: { $all: matches, $size: matches.length } },
+    function(err, rooms) {
+      if (err) {
+        return cb(err);
+      } else if (rooms) { // return existing room
+        return cb(null, rooms[0]);
+      } else { // return new room
+	var memberships = userIds.map(function(userId) {
+          return { userId: userId };
+        });
+
+        var room = new Room({
+          memberships: memberships,
+        });
+
+        room.save(function(err) {
+          if (err) {
+            return cb(err);
+          } else {
+            return cb(null, room);
+          }
+        });
+      }
+    }
+  );
+};
+*/
+
 var Room = mongoose.model('Room', roomSchema);
 
 module.exports = {
