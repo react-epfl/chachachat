@@ -1,6 +1,7 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
-  , crypto = require('crypto');
+  , crypto = require('crypto')
+  , report = require('../reporter');
 
 var userSchema = new Schema({
   username: {
@@ -38,7 +39,8 @@ userSchema.statics.findByUsername = function(username, cb) {
 };
 
 userSchema.statics.whereNameContains = function(name, cb) {
-  User.find({'username' : {$regex : '.*' + name + '*'}}, cb);
+  report.verbose('looking for users whose name contains ' + name);
+  User.find({'username' : new RegExp(name) }, cb);
 }
 
 userSchema.statics.register = function(user, cb) {
