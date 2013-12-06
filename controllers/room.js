@@ -5,29 +5,18 @@ var models = require('../models')
 
 module.exports = {
   onCreateRoom: function(socket, event) {
-    return function(data) {
-      var correspondentName = data.correspondent;
+    return function(data, res) {
+      var members = data.correspondentsId;
+      members.push(socket.handshake.user.id);
 
-      User.findByUsername(correspondentName, function(err, correspondent) {
+      Room.createRoom(members, function(err, room) {
         if (err) {
-          return socket.error500(event, 'Could not search for user ' + correspondentName, err);
-        } else if (! correspondent) {
-          return socket.error404(event, 'User ' + correspondentName + ' not found');
+          return socket.error500(event, 'Could not create room', err);
         }
 
-        var room = new Room({
-          memberships: [ { userId: correspondent.id }, { userId: socket.handshake.user.id } ],
-        });
+        report.debug('new room with id: ' + room.id + ' for users ' + room.memberships);
 
-        room.save(function(err) {
-          if (err) {
-            return socket.error500(event, 'Could not save room', err);
-          }
-
-          socket.emit('roomCreated', {
-            roomId: room.id
-          });
-        });
+        res({ roomId: room.id });
       });
     }
   },

@@ -1,5 +1,6 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
+  , ObjectId = mongoose.Types.ObjectId
   , messageSchema = require('./message').schema
   , report = require('../reporter');
 
@@ -65,20 +66,23 @@ roomSchema.statics.messagesSince = function (userId, since, cb) {
   .exec(cb);
 };
 
-/*
 roomSchema.statics.createRoom = function(userIds, cb) {
   var matches = userIds.map(function(userId) {
-    return { "$elemMatch": { userId: userId } }
+    return { "$elemMatch": { userId: ObjectId(userId) } }
   });
 
-  Room.find( { memberships: { $all: matches, $size: matches.length } },
-    function(err, rooms) {
+  mongoose.model('Room').find()
+    .where('memberships').all(matches)
+    .where('memberships').size(matches.length)
+    .exec(function(err, rooms) {
       if (err) {
+        report.verbose('createRoom: error while searching for room: ' + err);
         return cb(err);
-      } else if (rooms) { // return existing room
+      } else if (rooms.length > 0) { // return existing room
         return cb(null, rooms[0]);
       } else { // return new room
-	var memberships = userIds.map(function(userId) {
+        report.debug('createRoom: creating new room for users ' + userIds);
+        var memberships = userIds.map(function(userId) {
           return { userId: userId };
         });
 
@@ -94,10 +98,8 @@ roomSchema.statics.createRoom = function(userIds, cb) {
           }
         });
       }
-    }
-  );
+  });
 };
-*/
 
 var Room = mongoose.model('Room', roomSchema);
 
