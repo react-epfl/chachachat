@@ -1,6 +1,7 @@
 var models = require('../models')
   , Room = models.Room
   , User = models.User
+  , Message = models.Message
   , report = require('../reporter');
 
 module.exports = {
@@ -13,8 +14,7 @@ module.exports = {
         if (err) {
           return socket.error500(event, 'Could not create room', err);
         }
-
-        report.debug('new room with id: ' + room.id + ' for users ' + room.memberships);
+        report.debug('created new room with id: ' + room.id + ' for users ' + room.memberships);
 
         res({ roomId: room.id });
       });
@@ -22,20 +22,42 @@ module.exports = {
   },
 
   onSendMessage: function(socket, event) {
-    return function(data) {
-      data.message.author = socket.handshake.user.id;
+    return function(jsonMessage) {
+      var author = socket.handshake.user.id;
 
-      Room.findById(data.roomId, function(err, room) {
+      report.debug('user ' + author + ' sends message ' + JSON.stringify(jsonMessage));
+
+      jsonMessage.author = author;
+
+      var message = Message.fromJSON(jsonMessage);
+
+      Room.findById(message.roomId, function(err, room) {
         if (err) {
           return socket.error500(event, 'Could not search for room', err);
         }
         if (! room) {
-          return socket.error404(event, 'Room ' + data.roomId + ' not found');
+          return socket.error404(event, 'Room ' + message.roomId + ' not found');
         }
 
-        room.addMessage(data.message, function(err) {
+        room.addMessage(message, function(err) {
           if (err) {
             socket.error500(event, 'Could not add message', err);
+          }
+
+          for (var key in socket.namespace.sockets) {
+            if (socket.namespace.sockets.hasOwnProperty(key)) {
+              var clientSocket = socket.namespace.sockets[key];
+              var clientId = clientSocket.handshake.user.id;
+              // if some member of this room has id clientId, clientId belongs to this room
+              if (room.memberships.some(function(membership, index, array) {
+                return membership.userId.toString() === clientId;
+              })) {
+//                if (otherId !== author) {
+                  report.debug('forwarding message to ' + clientId + ' who is also connected and in the room');
+                  clientSocket.emit('newMessage', message);
+//                }
+              }
+            }
           }
         });
       });

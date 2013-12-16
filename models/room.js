@@ -33,8 +33,9 @@ roomSchema.method('addMessage', function(message, cb) {
   room.update({
     $push: { messages: message }
   }, function(err) {
-    if (err)
+    if (err) {
       return cb(err);
+    }
 
     room.updateAccess(message.author, cb);
   });

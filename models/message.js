@@ -6,7 +6,11 @@ var messageSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   },
-  vocabulary: [ String ],
+  roomId: {
+    type: Schema.ObjectId,
+    ref: 'Room'
+  },
+  content: [ String ],
   createdAt: {
     type: Date,
     default: Date.now
@@ -17,6 +21,12 @@ var messageSchema = new Schema({
   },
   color: String
 });
+
+messageSchema.statics.fromJSON = function(jsonMessage) {
+  // will allow us to check fields before blindly saving the message to the database.
+  var Message = mongoose.model('Message');
+  return new Message(jsonMessage);
+}
 
 var Message = mongoose.model('Message', messageSchema);
 
