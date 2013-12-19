@@ -16,6 +16,7 @@ var roomSchema = new Schema({
     }
   }],
   messages: [ messageSchema ],
+  groupName: String // only needed when there are more than 2 members
 });
 
 roomSchema.method('updateAccess', function(userId, cb) {

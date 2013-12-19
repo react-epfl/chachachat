@@ -16,7 +16,7 @@ module.exports = {
         }
         report.debug('created new room with id: ' + room.id + ' for users ' + room.memberships);
 
-        res({ roomId: room.id });
+        res(room);
       });
     }
   },

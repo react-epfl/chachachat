@@ -90,7 +90,9 @@ var apiLogin = function(req, res, next) {
         return res.status(500).sendfile('public/login.html');
       }
       report.verbose('User ' + req.body.username + ' logged in successfully');
-      return res.redirect('/');
+      res.send({
+        userId: user.id
+      });
     });
   })(req, res, next);
 };
