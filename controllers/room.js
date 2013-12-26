@@ -10,13 +10,17 @@ module.exports = {
       var members = data.correspondentsId;
       members.push(socket.handshake.user.id);
 
+      if (! members.some(function(user) { return user.id !== socket.handshake.user.id })) {
+        return socket.error(event, 'Can not discut with self');
+      }
+
       Room.createRoom(members, function(err, room) {
         if (err) {
           return socket.error500(event, 'Could not create room', err);
         }
         report.debug('created new room with id: ' + room.id + ' for users ' + room.memberships);
 
-        res(room);
+        res(room.toJSON());
       });
     }
   },
@@ -87,5 +91,17 @@ module.exports = {
         socket.emit('newMessages', messagesByRoom);
       });
     }
+  },
+
+  onGetRooms: function(socket, event) {
+    return function(res) {
+      var user = socket.handshake.user;
+
+      Room.roomsForUser(user, function(err, rooms) {
+        report.debug('while get rooms, got error ' + err);
+        report.debug('found rooms ' + rooms);
+        res(rooms.map(function(room) { return room.toJSON(); }));
+      });
+    };
   }
 };

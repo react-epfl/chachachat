@@ -42,6 +42,20 @@ roomSchema.method('addMessage', function(message, cb) {
   });
 });
 
+roomSchema.methods.toJSON = function() {
+  var json = {
+    roomId: this._id,
+    memberships: this.memberships,
+    messages: this.messages
+  };
+
+  if (this.groupName) {
+    json.groupName = this.groupName;
+  }
+
+  return json;
+};
+
 roomSchema.statics.messagesSince = function (userId, since, cb) {
   // mongoose will not automatically typecast arguments for aggregates
   if (typeof(since) === 'string') {
@@ -101,6 +115,14 @@ roomSchema.statics.createRoom = function(userIds, cb) {
         });
       }
   });
+};
+
+roomSchema.statics.roomsForUser = function(user, cb) {
+  mongoose.model('Room').find()
+    .where('memberships').elemMatch({
+      userId: user.id
+    })
+    .exec(cb);
 };
 
 var Room = mongoose.model('Room', roomSchema);
