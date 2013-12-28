@@ -46,7 +46,7 @@ roomSchema.methods.toJSON = function() {
   var json = {
     roomId: this._id,
     memberships: this.memberships,
-    messages: this.messages
+    messages: this.messages.map(function(message) { return message.toJSON(); })
   };
 
   if (this.groupName) {

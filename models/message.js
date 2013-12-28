@@ -22,6 +22,21 @@ var messageSchema = new Schema({
   color: String
 });
 
+messageSchema.methods.toJSON = function() {
+  return {
+    messageId: this._id,
+    roomId: this.roomId,
+    author: this.author,
+    content: this.content,
+    createdAt: this.createdAt,
+    loc: {
+      lat: this.lat,
+      lng: this.lng
+    },
+    color: this.color
+  };
+};
+
 messageSchema.statics.fromJSON = function(jsonMessage) {
   // will allow us to check fields before blindly saving the message to the database.
   var Message = mongoose.model('Message');
