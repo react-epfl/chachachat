@@ -11,6 +11,144 @@ var userSchema = new Schema({
   hashedPassword: String,
   salt: String,
   profile: {
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other']
+    },
+    age: {
+      type: String,
+      enum: ['teen', 'young', 'adult', 'mature', 'aged', 'senior']
+    },
+    stature: {
+      type: String,
+      enum: ['short', 'small', 'average', 'tall', 'gigantic']
+    },
+    physique: {
+      type: String,
+      enum: ['few extra kilos', 'molly', 'normal', 'fit', 'athletic']
+    },
+    allure: {
+      type: String,
+      enum: ['hideous', 'regular', 'elegant', 'beautiful', 'charismatic', 'stunning']
+    },
+    movies: {
+      type: String,
+      enum: [ '101 Dalmatians',
+              'Avatar',
+              'Ben-Hur',
+              'Doctor Zhivago',
+              'E. T. The Extra-Terrestrial',
+              'Fantasia',
+              'Finding Nemo',
+              'Forrest Gump',
+              'Gone With the Wind ',
+              'Grease',
+              'Harry Potter and the Deathly Hallows',
+              'Iron Man 3',
+              'Jaws',
+              'Jurassic Park',
+              'Marvel’s The Avengers',
+              'Mary Poppins',
+              'Pirates of the Caribbean',
+              'Raiders of the Lost Ark',
+              'Shrek 2',
+              'Snow White and the Seven Dwarfs',
+              'Spider-Man',
+              'Star Wars: Episode IV',
+              'The Dark Knight',
+              'The Exorcist',
+              'The Godfather',
+              'The Graduate',
+              'The Hunger Games',
+              'The Lion King',
+              'The Lord of the Rings',
+              'The Sound of Music',
+              'The Ten Commandments',
+              'Titanic' ]
+    },
+    personality: {
+      type: String,
+      enum: [ 'adorable',
+              'admirable',
+              'amazing',
+              'ambitious',
+              'annoying',
+              'big-hearted',
+              'bitchy',
+              'brilliant',
+              'clean',
+              'damaged',
+              'unforgettable',
+              'intellectual',
+              'generous',
+              'glamorous',
+              'gifted',
+              'gallant',
+              'graceful',
+              'happy',
+              'horny',
+              'old-fashioned',
+              'pleasant',
+              'real',
+              'rusty',
+              'special',
+              'very romantic' ]
+    },
+    interests: {
+      type: String,
+      enum: [ 'a bit of TV',
+              'books',
+              'pretty things',
+              'long walks on the beach',
+              'cats',
+              'dogs',
+              'oral sex',
+              'photography',
+              'liberal ideas',
+              'feminism',
+              'beach stones',
+              'ballroom dancing',
+              'culture',
+              'eating crisps',
+              'going slowly',
+              'one night stands',
+              'nice sexy feet',
+              'picnic',
+              'sex',
+              'smoking cigarettes',
+              'new places',
+              'well built men',
+              'yoga' ]
+    },
+    lookingFor: {
+      type: String,
+      enum: [ 'a luna park',
+              'a partner in crime',
+              'adventure',
+              'bondage',
+              'cosy nights',
+              'cuddling',
+              'doing jigsaw puzzles',
+              'drama',
+              'fire-wood',
+              'fulfillment',
+              'good restaurants',
+              'gym',
+              'hot showers',
+              'inner piece',
+              'love',
+              'massages',
+              'meaning',
+              'men',
+              'new places',
+              'rare coins',
+              'riding zip lines',
+              'the light at the end of the tunnel',
+              'the time of my life',
+              'thrills',
+              'whip',
+              'women' ]
+    }
   },
   phrases: [ String ],
   createdAt: {
@@ -29,8 +167,9 @@ userSchema.method('validatePassword', function(pw, cb) {
 
 userSchema.methods.publicData = function() {
   return {
-    id: this._id,
-    name: this.username
+    userId: this._id,
+    name: this.username,
+    profile: this.profile
   };
 }
 
