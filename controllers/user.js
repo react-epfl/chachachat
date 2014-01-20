@@ -26,7 +26,7 @@ function socketsForUser(user) {
 
 /* triggers for # sent achievement */
 userSchema.post('save', function(user, maybe, third) {
-  var sentAchievementSteps = [1, 3, 5, 7, 9, 11, 13];
+  var sentAchievementSteps = [0, 1, 10, 50, 100, 300, 1000, 5000];
 
   report.debug('user saved with fields: ' + JSON.stringify(user));
 
