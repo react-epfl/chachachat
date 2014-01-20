@@ -2,6 +2,7 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , ObjectId = mongoose.Types.ObjectId
   , messageSchema = require('./message').schema
+  , User = require('./user').model
   , report = require('../reporter');
 
 var roomSchema = new Schema({
@@ -38,7 +39,31 @@ roomSchema.method('addMessage', function(message, cb) {
       return cb(err);
     }
 
-    room.updateAccess(message.author, cb);
+    // update access times
+    room.updateAccess(message.author, function(err) { if (err) report.error(err); });
+
+    // update messages received and sent count
+    room.memberships.forEach(function(membership) {
+      var memberId = membership.userId;
+      User.findById(memberId, function(err, user) {
+        if (err) {
+          return report.error(err);
+        }
+
+        report.verbose('updating counts for member: ' + memberId);
+
+        if (memberId.toString() === message.author.toString()) {
+          user.msgSentCount += 1;
+        } else {
+          user.msgReceivedCount += 1;
+        }
+
+        user.save(function(err) { if (err) report.error(err); });
+      });
+    });
+
+    // callback call as the last instruction, we don't really need to wait for previous fields to be updated
+    cb();
   });
 });
 

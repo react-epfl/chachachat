@@ -1,7 +1,8 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , crypto = require('crypto')
-  , report = require('../reporter');
+  , report = require('../reporter')
+  , achievementSchema = require('./achievement').schema;
 
 var userSchema = new Schema({
   username: {
@@ -151,6 +152,14 @@ var userSchema = new Schema({
     }
   },
   phrases: [ String ],
+  msgReceivedCount: {
+    type: Number,
+    default: 0
+  },
+  msgSentCount: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -158,7 +167,8 @@ var userSchema = new Schema({
   lastSeen: {
     type: Date,
     default: Date.now
-  }
+  },
+  achievements: [ achievementSchema ]
 });
 
 userSchema.method('validatePassword', function(pw, cb) {
@@ -169,12 +179,26 @@ userSchema.methods.publicData = function() {
   return {
     userId: this._id,
     name: this.username,
-    profile: this.profile
+    profile: this.profile,
+    msgSentCount: this.msgSentCount,
+    msgReceivedCount: this.msgReceivedCount
   };
+};
+
+userSchema.methods.achievementForType = function(type) {
+  for (var i = 0; i < this.achievements.length; ++i) {
+    report.debug('looking at achievement ' + JSON.stringify(this.achievements[i]));
+
+    if (this.achievements[i].type.toString() === type) {
+      return this.achievements[i];
+    }
+  }
+
+  return null;
 }
 
 userSchema.statics.findByUsername = function(username, cb) {
-  this.findOne({ username: username }, cb);
+  this.findOne({ username: username }, cb); 
 };
 
 userSchema.statics.whereNameContains = function(name, cb) {

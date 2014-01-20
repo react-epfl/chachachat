@@ -1,20 +1,28 @@
-var controller = require('./controllers')
-  , report = require('./reporter');
+var report = require('./reporter');
 
-module.exports = {
-  socketio: {
-    onConnection: function(socket) {
-      var user = socket.handshake.user;
-      report.verbose('user ' + user.username + ' connected through websocket.');
-
-      report.addErrorHandling(socket);
-
-      socket.on('fetchMessages', controller.room.onFetchMessages(socket, 'fetchMessages'));
-      socket.on('createRoom', controller.room.onCreateRoom(socket, 'createRoom'));
-      socket.on('getRooms', controller.room.onGetRooms(socket, 'getRooms'));
-      socket.on('sendMessage', controller.room.onSendMessage(socket, 'sendMessage'));
-      socket.on('findUsers', controller.user.onFindUsers(socket, 'findUsers'));
-      socket.on('getUsers', controller.user.onGetUsers(socket, 'getUsers'));
-    }
+function Routes(io) {
+  var User = require('./controllers/user');
+  var controller = {
+    room: require('./controllers/room'),
+    user: new User(io)
   }
-};
+
+  this.onIOConnection = function(socket) {
+    var user = socket.handshake.user;
+    report.verbose('user ' + user.username + ' connected through websocket.');
+
+    report.addErrorHandling(socket);
+
+    socket.on('fetchMessages', controller.room.onFetchMessages(socket, 'fetchMessages'));
+    socket.on('createRoom', controller.room.onCreateRoom(socket, 'createRoom'));
+    socket.on('getRooms', controller.room.onGetRooms(socket, 'getRooms'));
+    socket.on('sendMessage', controller.room.onSendMessage(socket, 'sendMessage'));
+    socket.on('findUsers', controller.user.onFindUsers(socket, 'findUsers'));
+    socket.on('getUsers', controller.user.onGetUsers(socket, 'getUsers'));
+    socket.on('getAchievements', controller.user.onGetAchievements(socket, 'getAchievements'));
+  };
+
+  return this;
+}
+
+exports = module.exports = Routes;

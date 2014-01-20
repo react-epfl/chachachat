@@ -14,8 +14,7 @@ var express = require('express')
   , fs = require('fs')
   , path = require('path')
   , User = require('./models').User
-  , report = require('./reporter')
-  , routes = require('./routes');
+  , report = require('./reporter');
 
 var app = express();
 
@@ -137,7 +136,10 @@ io.set('authorization', passportSocketIO.authorize({
   store: sessionStore
 }));
 
-io.on('connection', routes.socketio.onConnection);
+var Routes = require('./routes');
+var routes = new Routes(io);
+
+io.on('connection', routes.onIOConnection);
 
 server.listen(app.get('port'), function() {
   report.log('Express server listening on port ' + app.get('port'));
