@@ -124,6 +124,59 @@ The server replies with updated publicly accessible attributes of the user:
         user: User
       }]
     }
+    
+### Get the characterstics values 
+
+The client simply calls getChars:
+
+    {
+      name: 'getChars'
+    }
+    
+The server replies with a chars reply:
+
+    {
+      name: 'chars',
+      args: [{
+        gender: [male,female,other],
+        age: [young, soso, old],
+        ...
+      }]
+    }    
+
+### Get a user's characterstics values 
+
+The client simply calls getChars
+
+    {
+      name: 'getMyChars'
+    }
+    
+### Updating a user's characterstics
+
+The client provides the updated characteristics:
+
+    {
+      name: 'updateChars'
+      args: [{
+        gender: 'XXX',
+        age: 'XX',
+        ...
+        
+      }]
+    }
+    
+The server replies to updatedChars and getChars with:
+
+    {
+      name: 'userChars',
+      args: [{
+        gender: 3,
+        age: 4,
+        ...
+      }]
+    }    
+    
 
 ### Getting a user's profile
 
@@ -144,6 +197,10 @@ The server replies with the publicly accessible attributes of the user:
         user: User
       }]
     }
+    
+    
+    
+    
 
 ### Creating a room
 The client provides the user he wants to chat with:
@@ -184,6 +241,30 @@ The server then pushes the message to the other client:
         message: Message
       }]
     }
+
+
+### Get a user's phrases 
+
+The client calls
+
+    {
+      name: 'getMyPhrases'
+    }
+    
+The server answers with an Array
+
+    {
+      name: 'phrases'
+      args: [{'hello', 'I like you'}]
+    }
+
+The server pushes new phrases to the client
+
+    {
+      name: 'phrase'
+      args: 'hello'
+    }
+
 
 After sending the message to the other client the server should confirm the message has been sent:
 
