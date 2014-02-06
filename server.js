@@ -1,7 +1,4 @@
-
-/**
- * Module dependencies.
- */
+// TODO: file documentation
 
 var express = require('express')
   , socketio = require('socket.io')
@@ -70,10 +67,11 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', function(req, res, next) {
-  if (req.isAuthenticated())
+  if (req.isAuthenticated()) {
     return next();
-  else
+  } else {
     res.redirect('/login.html');
+  }
 });
 
 var apiLogin = function(req, res, next) {
@@ -81,9 +79,11 @@ var apiLogin = function(req, res, next) {
     if (err) {
       return res.status(500).sendfile('public/login.html');
     }
+
     if (! user) {
       return res.status(404).sendfile('public/login.html');
     }
+
     req.logIn(user, function(err) {
       if (err) {
         return res.status(500).sendfile('public/login.html');

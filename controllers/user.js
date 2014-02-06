@@ -38,6 +38,7 @@ userSchema.post('save', function(user, maybe, third) {
     }
   }
 
+  // TODO: achievement level 0, what does it mean?
   if (newTier !== -1) {
     report.debug('user reached achievement step: ' + newTier);
   } else {

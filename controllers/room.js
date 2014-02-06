@@ -37,9 +37,10 @@ module.exports = {
 
       Room.findById(message.roomId, function(err, room) {
         if (err) {
-          return socket.error500(event, 'Could not search for room', err);
+          return socket.error500(event, 'Error while searching for a room', err);
         }
-        if (! room) {
+
+        if (!room) {
           return socket.error404(event, 'Room ' + message.roomId + ' not found');
         }
 
@@ -97,9 +98,14 @@ module.exports = {
     return function(res) {
       var user = socket.handshake.user;
 
+debugger
+
       Room.roomsForUser(user, function(err, rooms) {
-        report.debug('while get rooms, got error ' + err);
-        report.debug('found rooms ' + rooms);
+        if (err) {
+          return report.debug('While getRooms, got error ' + err);
+        }
+
+        report.debug('Found rooms ' + rooms);
         res(rooms.map(function(room) { return room.toJSON(); }));
       });
     };
