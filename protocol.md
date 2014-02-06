@@ -102,6 +102,29 @@ The server replies with a list of users (given as the publicly accessible attrib
       }];
     }
 
+### Updating a user's profile
+
+The client provides the user profile:
+
+    {
+      name: 'updateProfile'
+      args: [{
+        gender: 'XXX',
+        age: 'XX',
+        ...
+        
+      }]
+    }
+    
+The server replies with updated publicly accessible attributes of the user:
+
+    {
+      name: 'userProfile',
+      args: [{
+        user: User
+      }]
+    }
+
 ### Getting a user's profile
 
 The client provides the username of the user:
