@@ -26,6 +26,9 @@ function socketsForUser(user) {
 
 /* triggers for # sent achievement */
 userSchema.post('save', function(user, maybe, third) {
+
+// TODO: different logics if it is a newly created user or an udpated user
+
   var sentAchievementSteps = [0, 1, 10, 50, 100, 300, 1000, 5000];
 
   report.debug('user saved with fields: ' + JSON.stringify(user));
@@ -121,6 +124,7 @@ UserController.prototype.onGetUsers = function(socket, event) {
         };
       }))
       .exec(function(err, users) {
+        // TODO: handle error properly
         report.debug('retrieved users ' + users + ' during getUsers, with error ' + err);
         res(users.map(function(user) {
           return user.publicData();
