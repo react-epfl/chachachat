@@ -25,6 +25,9 @@ module.exports = {
     }
   },
 
+  /**
+   * Handles message send from one
+   */
   onSendMessage: function(socket, event) {
     return function(jsonMessage) {
       var author = socket.handshake.user.id;
@@ -32,7 +35,6 @@ module.exports = {
       report.debug('user ' + author + ' sends message ' + JSON.stringify(jsonMessage));
 
       jsonMessage.author = author;
-
       var message = Message.fromJSON(jsonMessage);
 
       Room.findById(message.roomId, function(err, room) {
@@ -51,16 +53,20 @@ module.exports = {
 
           for (var key in socket.namespace.sockets) {
             if (socket.namespace.sockets.hasOwnProperty(key)) {
+
               var clientSocket = socket.namespace.sockets[key];
               var clientId = clientSocket.handshake.user.id;
               // if some member of this room has id clientId, clientId belongs to this room
-              if (room.memberships.some(function(membership, index, array) {
-                return membership.userId.toString() === clientId;
-              })) {
-//                if (otherId !== author) {
-                  report.debug('forwarding message to ' + clientId + ' who is also connected and in the room');
-                  clientSocket.emit('newMessage', message);
-//                }
+              var isClientInRoom = room.memberships.some(
+                function(membership, index, array) {
+                  return membership.userId.toString() === clientId;
+                });
+
+              if (isClientInRoom) {
+                report.debug('forwarding message to ' + clientId + ' who is also connected and in the room');
+// TODO: we should send not the mongoose object to the client here, but something like jsonMessage
+
+                clientSocket.emit('newMessage', message._doc);
               }
             }
           }
@@ -97,8 +103,6 @@ module.exports = {
   onGetRooms: function(socket, event) {
     return function(res) {
       var user = socket.handshake.user;
-
-debugger
 
       Room.roomsForUser(user, function(err, rooms) {
         if (err) {

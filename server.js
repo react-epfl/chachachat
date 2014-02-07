@@ -11,7 +11,8 @@ var express = require('express')
   , fs = require('fs')
   , path = require('path')
   , User = require('./models').User
-  , report = require('./reporter');
+  , report = require('./reporter')
+  , Routes = require('./routes');
 
 var app = express();
 
@@ -128,7 +129,6 @@ var credentials = {
 var server = https.createServer(credentials, app);
 
 var io = socketio.listen(server);
-
 io.set('authorization', passportSocketIO.authorize({
   cookieParser: express.cookieParser,
   key: 'connect.sid',
@@ -136,7 +136,6 @@ io.set('authorization', passportSocketIO.authorize({
   store: sessionStore
 }));
 
-var Routes = require('./routes');
 var routes = new Routes(io);
 
 io.on('connection', routes.onIOConnection);

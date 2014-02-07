@@ -35,9 +35,7 @@ roomSchema.method('addMessage', function(message, cb) {
   room.update({
     $push: { messages: message }
   }, function(err) {
-    if (err) {
-      return cb(err);
-    }
+    if (err) { return cb(err) };
 
     // update access times
     room.updateAccess(message.author, function(err) { if (err) report.error(err); });
@@ -63,6 +61,7 @@ roomSchema.method('addMessage', function(message, cb) {
     });
 
     // callback call as the last instruction, we don't really need to wait for previous fields to be updated
+
     cb();
   });
 });

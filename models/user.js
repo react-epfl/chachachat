@@ -7,10 +7,15 @@ var mongoose = require('mongoose')
 var userSchema = new Schema({
   username: {
     type: String,
+    required: true,
     unique: true
   },
   hashedPassword: String,
   salt: String,
+  email: {
+    type: String,
+    unique: true
+  },
   profile: {
     gender: {
       type: String,
@@ -198,7 +203,7 @@ userSchema.methods.achievementForType = function(type) {
 }
 
 userSchema.statics.findByUsername = function(username, cb) {
-  this.findOne({ username: username }, cb); 
+  this.findOne({ username: username }, cb);
 };
 
 userSchema.statics.whereNameContains = function(name, cb) {
@@ -206,16 +211,19 @@ userSchema.statics.whereNameContains = function(name, cb) {
   User.find({'username' : new RegExp(name) }, cb);
 }
 
-userSchema.statics.register = function(user, cb) {
+userSchema.statics.register = function(reqUser, cb) {
   try {
     var salt = crypto.randomBytes(128).toString('base64');
-    var hashedpw = crypto.pbkdf2Sync(user.password, salt, 16384, 256).toString('base64');
+    var hashedpw = crypto.pbkdf2Sync(reqUser.password, salt, 16384, 256).toString('base64');
 
     var user = new User({
-      username: user.username,
+      username: reqUser.username,
       salt: salt,
-      hashedPassword: hashedpw
+      hashedPassword: hashedpw,
     });
+
+    var email = reqUser.email;
+    if (email) user.email = email
 
     user.save(cb);
   } catch (err) {
