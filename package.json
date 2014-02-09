@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "ChaChaChat - a instant messaging application",
   "main": "chachachatsrv.js",
-  "private": true,
+  "private": false,
+  "subdomain": "chachachat",
   "scripts": {
     "start": "node server.js"
   },
