@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html>
+ <head>
+  <title>
+   ChaChaChat
+  </title>
+ </head>
+ <body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect('https://localhost:3000');
+    socket.emit('hello', { my: 'data' });
+    socket.on('hi', function(data) {
+      console.log('user replied with hi');
+    });
+  </script>
+ </body>
+</html>

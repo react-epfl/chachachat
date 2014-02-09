@@ -1,0 +1,30 @@
+{
+  "name": "chachachat",
+  "version": "0.1.0",
+  "description": "ChaChaChat - a instant messaging application",
+  "main": "chachachatsrv.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "latest",
+    "mongoose": "latest",
+    "socket.io": "latest",
+    "passport": "latest",
+    "passport-local": "latest",
+    "jade": "latest",
+    "connect-redis": "latest",
+    "passport.socketio": "latest",
+    "winston": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/react-epfl/chachachat.git"
+  },
+  "author": "Andrii Vozniuk, Bruno Didot",
+  "license": "Copyrighted by Andrii Vozniuk",
+  "bugs": {
+    "url": "https://github.com/react-epfl/chachachat/issues"
+  }
+}

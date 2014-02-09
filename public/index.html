@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html>
+ <head>
+  <title>
+   ChaChaChat
+  </title>
+ </head>
+ <body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect('https://localhost:3000');
+    socket.emit('fetchMessages', { since: new Date("2013-11-18T14:14:00.829Z") });
+    socket.emit('createRoom', { correspondent: 'alice' });
+    socket.on('roomCreated', function(data) {
+      var roomId = data.roomId;
+      console.log('The room was created: ' + roomId);
+      socket.emit('sendMessage', {
+        roomId: roomId,
+        message: {
+          vocabulary: [ 'good', 'morning', 'alice' ],
+          color: "#144855"
+        }
+      });
+    });
+  </script>
+ </body>
+</html>
