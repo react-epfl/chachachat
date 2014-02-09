@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/react-epfl/chachachat.png)](https://codeclimate.com/github/react-epfl/chachachat)
+
 chachachat
 ==========
 
