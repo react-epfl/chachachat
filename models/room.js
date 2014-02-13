@@ -146,6 +146,7 @@ roomSchema.statics.roomsForUser = function(user, cb) {
     .where('memberships').elemMatch({
       userId: user.id
     })
+    .populate('memberships.userId')
     .exec(cb);
 };
 
