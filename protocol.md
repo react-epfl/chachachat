@@ -248,14 +248,14 @@ The server then pushes the message to the other client:
 The client calls
 
     {
-      name: 'getMyPhrases'
+      name: 'getUserPhrases'
     }
     
-The server answers with an Array
+The server answers with an Array of Strings
 
     {
       name: 'phrases'
-      args: [{'hello', 'I like you'}]
+      args: ['hello', 'I like you']
     }
 
 The server pushes new phrases to the client
