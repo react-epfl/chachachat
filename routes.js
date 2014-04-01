@@ -17,9 +17,17 @@ function Routes(io) {
     socket.on('createRoom', controller.room.onCreateRoom(socket, 'createRoom'));
     socket.on('getRooms', controller.room.onGetRooms(socket, 'getRooms'));
     socket.on('sendMessage', controller.room.onSendMessage(socket, 'sendMessage'));
+
+
     socket.on('findUsers', controller.user.onFindUsers(socket, 'findUsers'));
     socket.on('getUsers', controller.user.onGetUsers(socket, 'getUsers'));
     socket.on('getAchievements', controller.user.onGetAchievements(socket, 'getAchievements'));
+
+    socket.on('getProfileCharacteristics', controller.user.onGetProfileCharacteristics(socket, 'getProfileCharacteristics'));
+    socket.on('setProfileCharacteristics', controller.user.onSetProfileChars(socket, 'setProfileCharacteristics'));
+
+    // socket.on('getUserPhrases', controller.user.onGetUserPhrases(socket, 'getUserPhrases'));
+
   };
 
   return this;

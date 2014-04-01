@@ -81,7 +81,7 @@ var apiLogin = function(req, res, next) {
       return res.status(500).sendfile('public/login.html');
     }
 
-    if (! user) {
+    if (!user) {
       return res.status(404).sendfile('public/login.html');
     }
 
@@ -90,8 +90,14 @@ var apiLogin = function(req, res, next) {
         return res.status(500).sendfile('public/login.html');
       }
       report.verbose('User ' + req.body.username + ' logged in successfully');
+
+// TODO: get user phrases
+// user.initPhrases
+      var userPhrases = ['123 456 789', 'abc def', 'klm', 'nop'];
+
       res.send({
-        userId: user.id
+        userId: user.id,
+        userPhrases: userPhrases
       });
     });
   })(req, res, next);
@@ -101,6 +107,7 @@ app.post('/login', apiLogin);
 
 app.post('/register', function(req, res, next) {
   User.register(req.body, function(err) {
+
     if (err) {
       if (err.code === 11000) {
         res.status(409).send({

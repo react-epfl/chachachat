@@ -1,7 +1,7 @@
 {
   "name": "chachachat",
   "version": "0.1.1",
-  "description": "ChaChaChat - a instant messaging application",
+  "description": "ChaChaChat - an instant messaging application",
   "main": "chachachatsrv.js",
   "private": false,
   "subdomain": "chachachat",
@@ -9,15 +9,16 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "latest",
+    "express": "3.5.0",
     "mongoose": "latest",
     "socket.io": "latest",
     "passport": "latest",
     "passport-local": "latest",
     "jade": "latest",
-    "connect-redis": "latest",
+    "connect-redis": "1.4.x",
     "passport.socketio": "latest",
-    "winston": "latest"
+    "winston": "latest",
+    "underscore": "latest"
   },
   "repository": {
     "type": "git",

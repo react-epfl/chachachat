@@ -2,7 +2,8 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , crypto = require('crypto')
   , report = require('../reporter')
-  , achievementSchema = require('./achievement').schema;
+  , achievementSchema = require('./achievement').schema
+  , _ = require('underscore')
 
 var userSchema = new Schema({
   username: {
@@ -13,8 +14,7 @@ var userSchema = new Schema({
   hashedPassword: String,
   salt: String,
   email: {
-    type: String,
-    unique: true
+    type: String
   },
   profile: {
     gender: {
@@ -200,7 +200,49 @@ userSchema.methods.achievementForType = function(type) {
   }
 
   return null;
-}
+};
+
+// TODO: convert into an instance method
+userSchema.statics.getProfileChars = function(userId, cb) {
+  User.findById(userId, 'profile', function (err, user) {
+    if (err) return cb(err);
+
+    var profileChars = [];
+
+    var charNames = _.keys(User.schema.tree.profile);
+
+    for (var i = 0; i < charNames.length; i++) {
+      var charName = charNames[i];
+      var charValues = User.schema.path('profile.' + charName).enumValues;
+      var charSelected = user.profile[charName] || '';
+
+      var profileChar = {'name': charName, 'values': charValues, 'selected': charSelected};
+      profileChars.push(profileChar);
+    }
+
+    cb(err, profileChars);
+  })
+};
+
+// TODO: convert into an instance method
+userSchema.statics.setProfileChars = function (userId, newChars, cb) {
+
+  User.findById(userId, 'profile', function (err, user) {
+    if (err) return cb(err);
+
+    charsLength = newChars.length;
+    for (var i = 0; i < charsLength; i++) {
+      var curChar = newChars[i];
+
+      if (curChar.selected) {
+        user.profile[curChar.name] = curChar.selected;
+      }
+    }
+
+    // TODO: error logging and handling
+    user.save(cb);
+  })
+};
 
 userSchema.statics.findByUsername = function(username, cb) {
   this.findOne({ username: username }, cb);
@@ -223,7 +265,7 @@ userSchema.statics.register = function(reqUser, cb) {
     });
 
     var email = reqUser.email;
-    if (email) user.email = email
+    if (email) user.email = email;
 
     user.save(cb);
   } catch (err) {
