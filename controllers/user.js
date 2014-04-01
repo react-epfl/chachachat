@@ -90,6 +90,37 @@ function UserController(_socketio) {
 //  return this;
 }
 
+UserController.prototype.onGetProfileCharacteristics = function(socket, event) {
+  return function(data, res) {
+    var userId = socket.handshake.user.id;
+
+    User.getProfileChars(userId, function(err, profileChars) {
+      if (err) {
+        return socket.error500(event, 'Could not get profile characteristics', err);
+      }
+
+      report.debug('User profile characteristics ' + JSON.stringify(profileChars));
+
+      res(profileChars);
+    })
+  };
+};
+
+UserController.prototype.onSetProfileChars = function (socket, event) {
+  return function(data, res) {
+    var userId = socket.handshake.user.id;
+    var newChars = data;
+
+    User.setProfileChars(userId, newChars, function(err, profileChars) {
+      if (err) {
+        return socket.error500(event, 'Could not set profile characteristics', err);
+      }
+
+      res();
+    })
+  };
+}
+
 UserController.prototype.onFindUsers = function(socket, event) {
   return function(data, res) {
     var searchedName = data.name;
