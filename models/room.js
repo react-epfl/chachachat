@@ -80,6 +80,22 @@ roomSchema.methods.toJSON = function() {
   return json;
 };
 
+roomSchema.methods.populateMemberships = function(roomJSON, cb) {
+  mongoose.model('Room')
+    .findById(roomJSON.roomId.toString())
+    .populate('memberships.userId')
+    .exec(function(err, room) {
+
+      if (err) {
+        report.verbose('toJSON: error while searching for room: ' + err);
+        return cb(err);
+      }
+
+      roomJSON.memberships = room.memberships;
+      cb(null, roomJSON);
+    });
+}
+
 roomSchema.statics.messagesSince = function (userId, since, cb) {
   // mongoose will not automatically typecast arguments for aggregates
   if (typeof(since) === 'string') {
@@ -114,6 +130,7 @@ roomSchema.statics.createRoom = function(userIds, cb) {
   mongoose.model('Room').find()
     .where('memberships').all(matches)
     .where('memberships').size(matches.length)
+    .populate('memberships.userId')
     .exec(function(err, rooms) {
       if (err) {
         report.verbose('createRoom: error while searching for room: ' + err);
