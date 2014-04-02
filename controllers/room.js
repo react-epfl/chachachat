@@ -20,7 +20,12 @@ module.exports = {
         }
         report.debug('created new room with id: ' + room.id + ' for users ' + room.memberships);
 
-        res(room.toJSON());
+        var roomJSON = room.toJSON();
+
+        roomJSON = room.populateMemberships(roomJSON, function(err, roomJSON) {
+          // TODO: error handling
+          res(roomJSON);
+        });
       });
     }
   },

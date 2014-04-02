@@ -244,6 +244,38 @@ userSchema.statics.setProfileChars = function (userId, newChars, cb) {
   })
 };
 
+// TODO: convert into an instance method
+userSchema.statics.getUserPhrases = function (userId, cb) {
+  var userPhrases = [
+    'by the way',
+    'the sightseeing tour',
+    'feels huge',
+    'look forward',
+    'different things',
+    'just pure',
+    'the skyscraper',
+    'go so deep',
+    'distract me'
+  ];
+
+  cb(null, userPhrases);
+};
+
+userSchema.statics.getProfileStats = function (userId, cb) {
+  var userStats = [
+    {name: 'Messages sent', value: '243'},
+    {name: 'Messages received', value: '328'},
+    {name: 'Number of phrases', value: '12'},
+    {name: 'Best friend', value: 'Samantha'},
+    {name: 'Stalking', value: 'Paul'},
+    {name: 'Stalked by', value: 'Pam'},
+    {name: 'color', value: '#E45E9D'},
+    {name: 'description', value: 'Female, 1981, 167 cm, S, athletic, medium beige'}
+  ];
+
+  cb(null, userStats);
+};
+
 userSchema.statics.findByUsername = function(username, cb) {
   this.findOne({ username: username }, cb);
 };

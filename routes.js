@@ -26,7 +26,9 @@ function Routes(io) {
     socket.on('getProfileCharacteristics', controller.user.onGetProfileCharacteristics(socket, 'getProfileCharacteristics'));
     socket.on('setProfileCharacteristics', controller.user.onSetProfileChars(socket, 'setProfileCharacteristics'));
 
-    // socket.on('getUserPhrases', controller.user.onGetUserPhrases(socket, 'getUserPhrases'));
+    socket.on('getProfileStats', controller.user.onGetProfileStats(socket, 'getProfileStats'));
+
+    socket.on('getUserPhrases', controller.user.onGetUserPhrases(socket, 'getUserPhrases'));
 
   };
 

@@ -106,6 +106,22 @@ UserController.prototype.onGetProfileCharacteristics = function(socket, event) {
   };
 };
 
+UserController.prototype.onGetProfileStats = function(socket, event) {
+  return function(data, res) {
+    var userId = data;
+
+    User.getProfileStats(userId, function(err, profileStats) {
+      if (err) {
+        return socket.error500(event, 'Could not get profile stats', err);
+      }
+
+      report.debug('User profile stats ' + JSON.stringify(profileStats));
+
+      res(profileStats);
+    })
+  };
+};
+
 UserController.prototype.onSetProfileChars = function (socket, event) {
   return function(data, res) {
     var userId = socket.handshake.user.id;
@@ -118,6 +134,20 @@ UserController.prototype.onSetProfileChars = function (socket, event) {
 
       res();
     })
+  };
+}
+
+UserController.prototype.onGetUserPhrases = function (socket, event) {
+  return function(data, res) {
+    var userId = socket.handshake.user.id;
+
+    User.getUserPhrases(userId, function(err, userPhrases) {
+      if (err) {
+        return socket.error500(event, 'Could not get user phrases', err);
+      }
+
+      res(userPhrases);
+    });
   };
 }
 
