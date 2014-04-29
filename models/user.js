@@ -1,9 +1,11 @@
 var mongoose = require('mongoose')
+  , models = require('../models')
   , Schema = mongoose.Schema
   , crypto = require('crypto')
   , report = require('../reporter')
   , achievementSchema = require('./achievement').schema
   , _ = require('underscore')
+  , Dictionary = require('./dictionary').model
 
 var userSchema = new Schema({
   username: {
@@ -220,13 +222,17 @@ userSchema.statics.getProfileChars = function(userId, cb) {
       profileChars.push(profileChar);
     }
 
-    cb(err, profileChars);
+    // initialise the user dictionary if it is empty
+    if (!user.phrases || user.phrases.length === 0) {
+      user.phrases = Dictionary.getRandomPhrases(10);
+
+      user.save(cb(err, profileChars));
+    }
   })
 };
 
 // TODO: convert into an instance method
 userSchema.statics.setProfileChars = function (userId, newChars, cb) {
-
   User.findById(userId, 'profile', function (err, user) {
     if (err) return cb(err);
 
@@ -246,19 +252,12 @@ userSchema.statics.setProfileChars = function (userId, newChars, cb) {
 
 // TODO: convert into an instance method
 userSchema.statics.getUserPhrases = function (userId, cb) {
-  var userPhrases = [
-    'by the way',
-    'the sightseeing tour',
-    'feels huge',
-    'look forward',
-    'different things',
-    'just pure',
-    'the skyscraper',
-    'go so deep',
-    'distract me'
-  ];
+// TODO: for some reason it is called even before the profileChars are set during registration
+  User.findById(userId, function (err, user) {
+    if (err) return cb(err);
 
-  cb(null, userPhrases);
+    cb(null, user.phrases);
+  });
 };
 
 userSchema.statics.getProfileStats = function (userId, cb) {

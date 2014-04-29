@@ -3,7 +3,8 @@ var mongoose = require('mongoose')
   , ObjectId = mongoose.Types.ObjectId
   , messageSchema = require('./message').schema
   , User = require('./user').model
-  , report = require('../reporter');
+  , report = require('../reporter')
+  , _ = require('underscore');
 
 var roomSchema = new Schema({
   memberships: [{
@@ -55,6 +56,8 @@ roomSchema.method('addMessage', function(message, cb) {
         } else {
           user.msgReceivedCount += 1;
         }
+
+        user.phrases = _.union(user.phrases, message.content);
 
         user.save(function(err) { if (err) report.error(err); });
       });
