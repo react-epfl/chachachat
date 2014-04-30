@@ -2000,7 +2000,7 @@ dictionarySchema.statics.getRandomPhrases = function(number) {
 
   // TODO: instead use a mongodb query to select randomly from the db
   var shuffledDict = _.shuffle(dict);
-  var randomPhrases = _.first(dict, number);
+  var randomPhrases = _.first(shuffledDict, number);
 
   return randomPhrases;
 };
