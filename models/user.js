@@ -206,7 +206,7 @@ userSchema.methods.achievementForType = function(type) {
 
 // TODO: convert into an instance method
 userSchema.statics.getProfileChars = function(userId, cb) {
-  User.findById(userId, 'profile', function (err, user) {
+  User.findById(userId, 'profile, phrases', function (err, user) {
     if (err) return cb(err);
 
     var profileChars = [];
