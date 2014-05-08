@@ -18,7 +18,8 @@
     "connect-redis": "1.4.x",
     "passport.socketio": "latest",
     "winston": "latest",
-    "underscore": "latest"
+    "underscore": "latest",
+    "async": "latest"
   },
   "repository": {
     "type": "git",
