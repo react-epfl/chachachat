@@ -1,11 +1,12 @@
-var mongoose = require('mongoose')
-  , models = require('../models')
-  , Schema = mongoose.Schema
-  , crypto = require('crypto')
-  , report = require('../reporter')
-  , achievementSchema = require('./achievement').schema
-  , _ = require('underscore')
-  , Dictionary = require('./dictionary').model
+var mongoose = require('mongoose');
+var crypto = require('crypto');
+var async = require('async');
+var _ = require('underscore');
+var models = require('../models');
+var Schema = mongoose.Schema;
+var report = require('../reporter');
+var achievementSchema = require('./achievement').schema;
+var Dictionary = require('./dictionary').model;
 
 var userSchema = new Schema({
   username: {
@@ -18,6 +19,7 @@ var userSchema = new Schema({
   email: {
     type: String
   },
+  color: {type: String, default: '#E45E9D'},
   profile: {
     gender: {
       type: String,
@@ -206,7 +208,7 @@ userSchema.methods.achievementForType = function(type) {
 
 // TODO: convert into an instance method
 userSchema.statics.getProfileChars = function(userId, cb) {
-  User.findById(userId, 'profile, phrases', function (err, user) {
+  User.findById(userId, 'profile phrases', function (err, user) {
     if (err) return cb(err);
 
     var profileChars = [];
@@ -225,9 +227,10 @@ userSchema.statics.getProfileChars = function(userId, cb) {
     // initialise the user dictionary if it is empty
     if (!user.phrases || user.phrases.length === 0) {
       user.phrases = Dictionary.getRandomPhrases(10);
-
-      user.save(cb(err, profileChars));
+      return user.save(cb(err, profileChars));
     }
+
+    cb(err, profileChars);
   })
 };
 
@@ -260,19 +263,41 @@ userSchema.statics.getUserPhrases = function (userId, cb) {
   });
 };
 
+// TODO: convert into an instance method
 userSchema.statics.getProfileStats = function (userId, cb) {
-  var userStats = [
-    {name: 'Messages sent', value: '243'},
-    {name: 'Messages received', value: '328'},
-    {name: 'Number of phrases', value: '12'},
-    {name: 'Best friend', value: 'Samantha'},
-    {name: 'Stalking', value: 'Paul'},
-    {name: 'Stalked by', value: 'Pam'},
-    {name: 'color', value: '#E45E9D'},
-    {name: 'description', value: 'Female, 1981, 167 cm, S, athletic, medium beige'}
-  ];
+  User.findById(userId, function (err, user) {
+    if (err) return cb(err);
 
-  cb(null, userStats);
+    var userProfile = [
+      user.profile.gender,
+      user.profile.age,
+      user.profile.stature,
+      user.profile.physique,
+      user.profile.allure,
+      user.profile.personality,
+      user.profile.lookingFor
+    ];
+    var userDesc = userProfile.join(", ")
+
+    var bestFriendName = 'Andrii';
+    var stalkingName = 'Denis';
+    var stalkedByName = 'Adrian';
+
+    var userStats = [
+      {name: 'Messages sent', value: user.msgSentCount.toString()},
+      {name: 'Messages received', value: user.msgReceivedCount.toString()},
+      {name: 'Number of phrases', value: user.phrases.length.toString()},
+
+      {name: 'Best friend', value: bestFriendName},
+      {name: 'Stalking', value: stalkingName},
+      {name: 'Stalked by', value: stalkedByName},
+      {name: 'color', value: user.color},
+
+      {name: 'description', value: userDesc}
+    ];
+
+    cb(null, userStats);
+  });
 };
 
 userSchema.statics.findByUsername = function(username, cb) {

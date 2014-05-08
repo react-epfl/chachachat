@@ -55,9 +55,14 @@ roomSchema.method('addMessage', function(message, cb) {
           user.msgSentCount += 1;
         } else {
           user.msgReceivedCount += 1;
+          user.color = message.color;
         }
 
-        user.phrases = _.union(user.phrases, message.content);
+        var newPhrases = _.filter(message.content, function(phrase) {
+          return phrase !== "";
+        })
+
+        user.phrases = _.union(user.phrases, newPhrases);
 
         user.save(function(err) { if (err) report.error(err); });
       });

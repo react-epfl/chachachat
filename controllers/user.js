@@ -108,7 +108,7 @@ UserController.prototype.onGetProfileCharacteristics = function(socket, event) {
 
 UserController.prototype.onGetProfileStats = function(socket, event) {
   return function(data, res) {
-    var userId = data;
+    var userId = data.peer_id;
 
     User.getProfileStats(userId, function(err, profileStats) {
       if (err) {
