@@ -153,21 +153,22 @@ UserController.prototype.onGetUserPhrases = function (socket, event) {
 
 UserController.prototype.onFindUsers = function(socket, event) {
   return function(data, res) {
-    var searchedName = data.name;
+    var searchedChars = data.characteristics;
 
-    User.whereNameContains(searchedName, function(err, users) {
+    User.findByProfile(searchedChars, function(err, users) {
       if (err) {
-        return socket.error500(event, 'Could not search users', err);
+        return socket.error500(event, 'Error while searching for users', err);
       }
 
-      res(users
+      var otherUsers = users
         .filter(function(user) {
           return user.id !== socket.handshake.user.id;
         })
         .map(function(user) {
           return user.publicData();
-        })
-      );
+        });
+
+      res(otherUsers);
     });
   };
 };
