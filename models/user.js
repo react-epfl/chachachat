@@ -288,9 +288,10 @@ userSchema.statics.getProfileStats = function (userId, cb) {
       {name: 'Messages received', value: user.msgReceivedCount.toString()},
       {name: 'Number of phrases', value: user.phrases.length.toString()},
 
-      {name: 'Best friend', value: bestFriendName},
-      {name: 'Stalking', value: stalkingName},
-      {name: 'Stalked by', value: stalkedByName},
+      // TODO: put back when the logic is ready
+      // {name: 'Best friend', value: bestFriendName},
+      // {name: 'Stalking', value: stalkingName},
+      // {name: 'Stalked by', value: stalkedByName},
       {name: 'color', value: user.color},
 
       {name: 'description', value: userDesc}
@@ -302,6 +303,21 @@ userSchema.statics.getProfileStats = function (userId, cb) {
 
 userSchema.statics.findByUsername = function(username, cb) {
   this.findOne({ username: username }, cb);
+};
+
+userSchema.statics.findByProfile = function (chars, cb) {
+  var searchObj = {};
+
+  _.each(chars, function(charact) {
+    var fieldName = 'profile.' + charact.name;
+    var fieldValue = charact.selected;
+
+    searchObj[fieldName] = fieldValue;
+  });
+
+  this.find(searchObj)
+      .limit(20)
+      .exec(cb);
 };
 
 userSchema.statics.whereNameContains = function(name, cb) {
