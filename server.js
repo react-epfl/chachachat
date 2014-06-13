@@ -1,18 +1,19 @@
 // TODO: file documentation
 
-var express = require('express')
-  , socketio = require('socket.io')
-  , RedisStore = require('connect-redis')(express)
-  , mongoose = require('mongoose')
-  , passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy
-  , passportSocketIO = require('passport.socketio')
-  , https = require('https')
-  , fs = require('fs')
-  , path = require('path')
-  , User = require('./models').User
-  , report = require('./reporter')
-  , Routes = require('./routes');
+var express = require('express');
+var session = require('express-session');
+var RedisStore = require('connect-redis')(session);
+var socketio = require('socket.io');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var passportSocketIO = require('passport.socketio');
+var https = require('https');
+var fs = require('fs');
+var path = require('path');
+var User = require('./models').User;
+var report = require('./reporter');
+var Routes = require('./routes');
 
 var app = express();
 
@@ -26,7 +27,7 @@ app.set('port', process.env.PORT || 3000);
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.cookieParser());
-app.use(express.session({
+app.use(session({
   store: sessionStore,
   secret: sessionSecret
 }));

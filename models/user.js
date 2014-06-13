@@ -169,6 +169,10 @@ var userSchema = new Schema({
     type: Number,
     default: 0
   },
+  roomsCount: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -194,15 +198,16 @@ userSchema.methods.publicData = function() {
   };
 };
 
-userSchema.methods.achievementForType = function(type) {
-  for (var i = 0; i < this.achievements.length; ++i) {
-    report.debug('looking at achievement ' + JSON.stringify(this.achievements[i]));
+userSchema.methods.achievementForName = function(name) {
+  if (this.achievements) {
+    for (var i = 0; i < this.achievements.length; ++i) {
+      report.debug('looking at achievement ' + JSON.stringify(this.achievements[i]));
 
-    if (this.achievements[i].type.toString() === type) {
-      return this.achievements[i];
+      if (this.achievements[i].name.toString() === name) {
+        return this.achievements[i];
+      }
     }
   }
-
   return null;
 };
 
@@ -259,7 +264,60 @@ userSchema.statics.getUserPhrases = function (userId, cb) {
   User.findById(userId, function (err, user) {
     if (err) return cb(err);
 
-    cb(null, user.phrases);
+    cb(err, user.phrases);
+  });
+};
+
+
+// TODO: convert into an instance method
+userSchema.statics.getUserAchievements = function (userId, cb) {
+// TODO: for some reason it is called even before the profileChars are set during registration
+  User.findById(userId, function (err, user) {
+    if (err) return cb(err);
+
+    // TODO: should be in the db independantly for each achievement type
+    var achLevels = [1, 10, 50, 100, 300, 1000, 5000];
+
+    var userAchievements = [];
+    var name, desc, level, value, untilNext;
+
+    // TODO: probably we should not use an array but a hash for the achievements
+    _.each(user.achievements, function(achievement) {
+      name = achievement.name;
+      level = achievement.level;
+      desc = achievement.desc;
+
+      switch(achievement.name) {
+        case 'Big Mouth':
+          value = user.msgSentCount;
+        break;
+
+        case 'Talk To Me':
+          value = user.msgReceivedCount;
+        break;
+
+        case 'Cool Kid':
+          value = user.roomsCount;
+        break;
+
+        case 'Me Speak Good':
+          achLevels = [20, 30, 50, 100, 300, 1000, 5000];;
+          value = user.phrases.length;
+        break;
+      }
+
+      untilNext = achLevels[level] - value;
+
+      userAchievements.push({
+        name: name,
+        level: level,
+        value: value,
+        desc: desc,
+        untilNext: untilNext
+      })
+    })
+
+    cb(err, userAchievements);
   });
 };
 
@@ -284,9 +342,9 @@ userSchema.statics.getProfileStats = function (userId, cb) {
     var stalkedByName = 'Adrian';
 
     var userStats = [
-      {name: 'Messages sent', value: user.msgSentCount.toString()},
-      {name: 'Messages received', value: user.msgReceivedCount.toString()},
-      {name: 'Number of phrases', value: user.phrases.length.toString()},
+      {name: 'Messages sent', value: user.msgSentCount},
+      {name: 'Messages received', value: user.msgReceivedCount},
+      {name: 'Number of phrases', value: user.phrases.length},
 
       // TODO: put back when the logic is ready
       // {name: 'Best friend', value: bestFriendName},
@@ -334,6 +392,28 @@ userSchema.statics.register = function(reqUser, cb) {
       username: reqUser.username,
       salt: salt,
       hashedPassword: hashedpw,
+      achievements: [ // init achievements
+        {
+          name: 'Big Mouth',
+          desc: 'Number of messages sent',
+          level: 0 // TODO: check if it is needed since we have a default value
+        },
+        {
+          name: 'Talk To Me',
+          desc: 'Number of messages received',
+          level: 0
+        },
+        {
+          name: 'Cool Kid',
+          desc: 'Number of friends',
+          level: 0
+        },
+        {
+          name: 'Me Speak Good',
+          desc: 'Number of phrases',
+          level: 0
+        }
+      ]
     });
 
     var email = reqUser.email;

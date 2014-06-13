@@ -1,11 +1,12 @@
-var models = require('../models')
-  , User = models.User
-  , userSchema = models.userSchema
-  , report = require('../reporter');
+var models = require('../models');
+var User = models.User;
+var Achievement = models.Achievement;
+var userSchema = models.userSchema;
+var report = require('../reporter');
 
 var io = null;
 
-function socketsForUser(user) {
+socketsForUser = function(user) {
   report.debug('getting sockets from ' + user._id.toString());
 
   return io.sockets.clients().filter(function(socket) {
@@ -25,64 +26,79 @@ function socketsForUser(user) {
 }
 
 /* triggers for # sent achievement */
-userSchema.post('save', function(user, maybe, third) {
+userSchema.post('save', function(user) {
+  var achName = 'Big Mouth';
+  var sentAchLevels = [1, 10, 50, 100, 300, 1000, 5000];
+  var curValue = user.msgSentCount;
 
-// TODO: different logics if it is a newly created user or an udpated user
+  report.debug('a user was saved: ' + user.username);
 
-  var sentAchievementSteps = [0, 1, 10, 50, 100, 300, 1000, 5000];
-
-  report.debug('user saved with fields: ' + JSON.stringify(user));
-
-  // check if the # of sent messages corresponds to an achievement step.
-  var newTier = -1;
-  for (var i = 0; i < sentAchievementSteps.length; ++i) {
-    if (sentAchievementSteps[i] === user.msgSentCount) {
-      newTier = i;
-    }
-  }
-
-  // TODO: achievement level 0, what does it mean?
-  if (newTier !== -1) {
-    report.debug('user reached achievement step: ' + newTier);
-  } else {
-    report.debug('user did not reach any achievement step');
-  }
-
-  // check that the increment has not already been reported
-  var isNewAchievement = newTier !== -1 && (user.achievementForType('sent') === null || user.achievementForType('sent').tier < newTier);
-
-  if (isNewAchievement) {
-    report.debug('the achievement is new, will notify user');
-  }
-
-  if (isNewAchievement) {
-    // notify the user that a new achievement has been unlocked
-    report.debug('Notifying the user that an achievement has been reached');
+  Achievement.checkAndNotify(user, achName, sentAchLevels, curValue, function(newAchievementObj) {
     socketsForUser(user).forEach(function(socket) {
-      socket.emit('newAchievement', {
-        type: 'sent',
-        tier: newTier,
-        steps: sentAchievementSteps,
-      });
+      socket.emit('newAchievement', newAchievementObj);
     });
-
-    // save the achievement in the user model, iff it has not already been defined
-    var achievement = user.achievementForType('sent');
-    if (achievement) {
-      achievement.tier = newTier;
-    } else {
-      user.achievements.push({
-        type: 'sent',
-        tier: newTier
-      });
-    }
-    user.save(function(err) { report.log('user: ' + user.username + '; error while saving achievement tier')});
-  }
+  });
 });
 
 /* triggers for # received achievement */
 userSchema.post('save', function(user, maybe, third) {
+  var achName = 'Talk To Me';
+  var receivedAchievementLevels = [1, 10, 50, 100, 300, 1000, 5000];
+  var curValue = user.msgReceivedCount;
+
+  Achievement.checkAndNotify(user, achName, receivedAchievementLevels, curValue, function(newAchievementObj) {
+    socketsForUser(user).forEach(function(socket) {
+      socket.emit('newAchievement', newAchievementObj);
+    });
+  });
+});
+
+/* triggers for # of rooms/friends */
+userSchema.post('save', function(user, maybe, third) {
+  var achName = 'Cool Kid';
+  var receivedAchievementLevels = [1, 10, 50, 100, 300, 1000, 5000];
+  var curValue = user.roomsCount;
+
+  Achievement.checkAndNotify(user, achName, receivedAchievementLevels, curValue, function(newAchievementObj) {
+    socketsForUser(user).forEach(function(socket) {
+      socket.emit('newAchievement', newAchievementObj);
+    });
+  });
+});
+
+/* triggers for # phrases */
+userSchema.post('save', function(user, maybe, third) {
+  if (!user.phrases) return; // a dirty hack when phrases are not defined
+
+  var achName = 'Me Speak Good';
+  var phrasesAchievementSteps = [20, 30, 50, 100, 300, 1000, 5000];
+  var curValue = user.phrases.length;
+
+  Achievement.checkAndNotify(user, achName, phrasesAchievementSteps, curValue, function(newAchievementObj) {
+    socketsForUser(user).forEach(function(socket) {
+      socket.emit('newAchievement', newAchievementObj);
+    });
+  });
+});
+
+// TODO: hooks should be moved into the User model
+// TODO: maybe we should not use hooks since this code is executed on every user change
+/* triggers for # phrases recieved from different countries */
+userSchema.post('save', function(user, maybe, third) {
+  var achName = 'Globetrotter';
   var receivedAchievementSteps = [1, 10, 50, 100, 300, 1000, 5000];
+
+  // TODO: think how to actually implement it
+  // Achievement.checkAndNotify(user, achName, sentAchLevels, curValue);
+});
+
+/* triggers for # phrases sent to different countries */
+userSchema.post('save', function(user, maybe, third) {
+  var achName = 'Pony Express';
+  var receivedAchievementSteps = [1, 10, 50, 100, 300, 1000, 5000];
+
+  // TODO: think how to actually implement it
+  // Achievement.checkAndNotify(user, achName, sentAchLevels, curValue);
 });
 
 function UserController(_socketio) {
@@ -196,8 +212,16 @@ UserController.prototype.onGetUsers = function(socket, event) {
 };
 
 UserController.prototype.onGetAchievements = function(socket, event) {
-  return function(res) {
-    res(socket.handshake.user.achievements);
+  return function(data, res) {
+    var userId = socket.handshake.user.id;
+
+    User.getUserAchievements(userId, function(err, userAchievements) {
+      if (err) {
+        return socket.error500(event, 'Could not get user achievements', err);
+      }
+
+      res(userAchievements);
+    })
   };
 }
 
