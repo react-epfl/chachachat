@@ -31,11 +31,9 @@ roomSchema.method('updateAccess', function(userId, cb) {
 });
 
 roomSchema.method('addMessage', function(message, cb) {
-  var room = this;
+  this.messages.push(message);
 
-  room.update({
-    $push: { messages: message }
-  }, function(err) {
+  this.save(function(err, room) {
     if (err) { return cb(err) };
 
     // update access times
@@ -49,8 +47,11 @@ roomSchema.method('addMessage', function(message, cb) {
           return report.error(err);
         }
 
-        report.verbose('updating counts for member: ' + memberId);
+        if (room.messages.length === 1) { // the first message was published
+          user.roomsCount += 1;
+        }
 
+        report.verbose('updating counts for member: ' + memberId);
         if (memberId.toString() === message.author.toString()) {
           user.msgSentCount += 1;
         } else {
@@ -69,7 +70,6 @@ roomSchema.method('addMessage', function(message, cb) {
     });
 
     // callback call as the last instruction, we don't really need to wait for previous fields to be updated
-
     cb();
   });
 });
@@ -143,8 +143,10 @@ roomSchema.statics.createRoom = function(userIds, cb) {
       if (err) {
         report.verbose('createRoom: error while searching for room: ' + err);
         return cb(err);
+
       } else if (rooms.length > 0) { // return existing room
         return cb(null, rooms[0]);
+
       } else { // return new room
         report.debug('createRoom: creating new room for users ' + userIds);
         var memberships = userIds.map(function(userId) {
