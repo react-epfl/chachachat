@@ -8,7 +8,7 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var passportSocketIO = require('passport.socketio');
-var https = require('https');
+var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var User = require('./models').User;
@@ -134,7 +134,7 @@ var credentials = {
   cert: fs.readFileSync('config/chachachat-cert.pem')
 };
 
-var server = https.createServer(credentials, app);
+var server = http.createServer(app);
 
 var io = socketio.listen(server);
 io.set('authorization', passportSocketIO.authorize({
