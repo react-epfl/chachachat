@@ -8,10 +8,11 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var passportSocketIO = require('passport.socketio');
-var http = require('http');
+var http = require('http'); // on production we use stunnel as a ssl connection point
+var https = require('https'); // to be able to test locally
 var fs = require('fs');
 var path = require('path');
-var User = require('./models').User;
+var apn = require('apn');
 var report = require('./reporter');
 var Routes = require('./routes');
 
@@ -19,14 +20,89 @@ var app = express();
 
 // all environments
 var sessionSecret = 'chachachat-application';
-var sessionStore = new RedisStore({
+
+// Redis session store
+sessionStore = new RedisStore({
   host: 'localhost'
 });
+
+// MongoDB connection
+mongoose.connection.on('error', function(err) {
+  report.info('MongoDB connection error: ' + err.message);
+});
+
+mongoose.connection.on("open", function() {
+  report.info('MongoDB connection established');
+});
+
+mongoose.connect('mongodb://localhost/chachachat');
+
+// Apple push notifications connection
+var dev_cert_path = path.join(__dirname, 'cert.pem');
+var dev_key_path = path.join(__dirname, 'key.pem');
+
+// TODO: move to a config file
+var apnOptions = {
+  'production': app.get('env') === 'production',
+  'cert': dev_cert_path,
+  'key': dev_key_path,
+  'passphrase':'12345'
+};
+
+var apnConnection = new apn.Connection(apnOptions);
+
+apnConnection.on('connected', function (res) {
+  report.info('Connection with Apple push notifications established: ' + JSON.stringify(res));
+});
+
+apnConnection.on('disconnected', function (res) {
+  report.info('Disconnected from Apple push notifications: ' + JSON.stringify(res));
+});
+
+apnConnection.on('transmitted', function (res){
+  report.info('A push notification was sent: ' + JSON.stringify(res));
+});
+
+apnConnection.on('error', function (res){
+  report.error('An error occured when sending a push notification: ' + JSON.stringify(res));
+});
+
+apnConnection.on('transmissionError', function (res){
+  report.error('A transmission error occured when sending a push notification: ' + JSON.stringify(res));
+});
+
+apnConnection.on('socketError', function (err){
+  report.error('An Apple push notifications socket connection experienced an error: ' + JSON.stringify(err));
+});
+
+app.apnConnection = apnConnection;
+
+// Bootstrap models
+var camelize = function (underscored, upcaseFirstLetter) {
+  var res = '';
+  underscored.split('_').forEach(function (part) {
+    res += part[0].toUpperCase() + part.substr(1);
+  });
+  return upcaseFirstLetter ? res : res[0].toLowerCase() + res.substr(1);
+}
+
+var modelsDir = './models/';
+fs.readdirSync(modelsDir).forEach(function(file) {
+  var fileName, model, modelName;
+  model = require(modelsDir + file);
+  fileName = file.replace(/.js$/, "");
+  modelName = camelize(fileName, true);
+  app[modelName] = mongoose.model(modelName, model.Schema);
+  return model.initModel(app);
+});
+report.info('Models initialised');
+
 
 app.set('port', process.env.PORT || 3000);
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.cookieParser());
+
 app.use(session({
   store: sessionStore,
   secret: sessionSecret
@@ -38,7 +114,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    User.findByUsername(username, function(err, user) {
+    app.User.findByUsername(username, function(err, user) {
       if (err) { return done(err); }
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
@@ -56,12 +132,10 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
+  app.User.findById(id, function(err, user) {
     done(err, user);
   });
 });
-
-mongoose.connect('mongodb://localhost/chachachat');
 
 // development only
 if ('development' == app.get('env')) {
@@ -75,6 +149,7 @@ app.get('/', function(req, res, next) {
     res.redirect('/login.html');
   }
 });
+
 
 var apiLogin = function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
@@ -92,6 +167,8 @@ var apiLogin = function(req, res, next) {
       }
       report.verbose('User ' + req.body.username + ' logged in successfully');
 
+// TODO: a bug, should send back  real phrases back
+
 // TODO: get user phrases
 // user.initPhrases
       var userPhrases = ['123 456 789', 'abc def', 'klm', 'nop'];
@@ -107,7 +184,7 @@ var apiLogin = function(req, res, next) {
 app.post('/login', apiLogin);
 
 app.post('/register', function(req, res, next) {
-  User.register(req.body, function(err) {
+  app.User.register(req.body, function(err) {
 
     if (err) {
       if (err.code === 11000) {
@@ -129,12 +206,18 @@ app.post('/register', function(req, res, next) {
   });
 });
 
-var credentials = {
-  key: fs.readFileSync('config/chachachat-key.pem'),
-  cert: fs.readFileSync('config/chachachat-cert.pem')
-};
 
-var server = http.createServer(app);
+var server;
+if (app.get('env') === 'production') {
+  server = http.createServer(app);
+} else {
+  var credentials = {
+    key: fs.readFileSync('config/chachachat-key.pem'),
+    cert: fs.readFileSync('config/chachachat-cert.pem')
+  };
+  server = https.createServer(credentials, app); // to be able to test local;
+}
+
 
 var io = socketio.listen(server);
 io.set('authorization', passportSocketIO.authorize({
@@ -143,6 +226,18 @@ io.set('authorization', passportSocketIO.authorize({
   secret: sessionSecret,
   store: sessionStore
 }));
+
+app.io = io;
+
+// Bootstrap controllers
+var controllersDir = './controllers';
+fs.readdirSync(controllersDir).forEach(function(file) {
+  var controller;
+  controller = require(controllersDir + "/" + file);
+  return controller.initController(app);
+});
+report.info('Controllers initialised');
+
 
 var routes = new Routes(io);
 

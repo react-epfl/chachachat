@@ -1,10 +1,22 @@
-var models = require('../models')
-  , Room = models.Room
-  , User = models.User
-  , Message = models.Message
-  , report = require('../reporter');
+/**
+ * Room controller
+ */
+
+'use strict';
+
+/******************************************************************************
+ * Module dependencies
+ */
+var app //all application-wide things like ENV, config, logger, etc
+var report = require('../reporter');;
+var apn = require('apn');
 
 module.exports = {
+
+  initController : function (myApp, opts) {
+    app = myApp;
+  },
+
   onCreateRoom: function(socket, event) {
     return function(data, res) {
       var members = data.correspondentsId;
@@ -14,7 +26,7 @@ module.exports = {
         return socket.error(event, 'Can not discut with self');
       }
 
-      Room.createRoom(members, function(err, room) {
+      app.Room.createRoom(members, function(err, room) {
         if (err) {
           return socket.error500(event, 'Could not create room', err);
         }
@@ -40,9 +52,11 @@ module.exports = {
       report.debug('user ' + author + ' sends message ' + JSON.stringify(jsonMessage));
 
       jsonMessage.author = author;
-      var message = Message.fromJSON(jsonMessage);
+      var message = app.Message.fromJSON(jsonMessage);
 
-      Room.findById(message.roomId, function(err, room) {
+      app.Room.findById(message.roomId)
+          .populate('memberships.userId', 'token')
+          .exec(function(err, room) {
         if (err) {
           return socket.error500(event, 'Error while searching for a room', err);
         }
@@ -56,26 +70,49 @@ module.exports = {
             socket.error500(event, 'Could not add message', err);
           }
 
+          // TODO: do notification of sockets in a room with sockets.in(roomId).emit
+          // send message to room members via socket
           for (var key in socket.namespace.sockets) {
             if (socket.namespace.sockets.hasOwnProperty(key)) {
-
               var clientSocket = socket.namespace.sockets[key];
               var clientId = clientSocket.handshake.user.id;
               // if some member of this room has id clientId, clientId belongs to this room
               var isClientInRoom = room.memberships.some(
                 function(membership, index, array) {
-                  return membership.userId.toString() === clientId;
+                  return membership.userId.id === clientId;
                 });
 
               if (isClientInRoom) {
                 report.debug('forwarding message to ' + clientId + ' who is also connected and in the room');
 // TODO: we should send not the mongoose object to the client here, but something like jsonMessage
-
                 clientSocket.emit('newMessage', message._doc);
               }
             }
           }
         });
+
+        app.User.findById(author, 'username', function (err, user) {
+          // create a push notification
+          var note = new apn.Notification();
+          note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+          note.badge = 1;
+          note.sound = "ping.aiff";
+          note.alert = user.username + ' has sent a new message';
+          note.payload = {'roomId': room.id};
+
+          // send message to room members via apple push notifications
+          room.memberships.forEach(function(membership) {
+            if (membership.userId.id !== author) { // don't notify the author
+              // membership.userId.tokens.forEach(function(deviceToken) { // several devices per user
+                var deviceToken = membership.userId.token;
+                if (deviceToken) { // for the emulator there is no deviceToken
+                  var device = new apn.Device(deviceToken);
+                  app.apnConnection.pushNotification(note, device);
+                }
+              // })
+            }
+          })
+        })
       });
     }
   },
@@ -85,7 +122,7 @@ module.exports = {
       var userId = socket.handshake.user._id;
       var since = data.since;
 
-      Room.messagesSince(userId, since, function(err, messagesByRoom) {
+      app.Room.messagesSince(userId, since, function(err, messagesByRoom) {
         if (err) {
           return socket.error500(event, 'Could not search in room collection', err);
         }
@@ -109,13 +146,17 @@ module.exports = {
     return function(res) {
       var user = socket.handshake.user;
 
-      Room.roomsForUser(user, function(err, rooms) {
+      app.Room.roomsForUser(user, function(err, rooms) {
         if (err) {
           return report.debug('While getRooms, got error ' + err);
         }
+        report.debug('Found rooms ' + rooms.length);
 
-        report.debug('Found rooms ' + rooms);
-        res(rooms.map(function(room) { return room.toJSON(); }));
+        var roomsJSON = rooms.map(function(room) {
+          return room.toJSON();
+        })
+
+        res(roomsJSON);
       });
     };
   }

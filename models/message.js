@@ -1,7 +1,24 @@
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema;
+/**
+ * Message model
+ */
 
-var messageSchema = new Schema({
+'use strict';
+
+/******************************************************************************
+ * Module dependencies
+ */
+var app; //all application-wide things like ENV, models, config, logger, etc
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+exports.initModel = function (myApp, opts) {
+  app = myApp;
+};
+
+/******************************************************************************
+ * Schema
+ */
+var messageSchema = exports.Schema = new Schema({
   author: {
     type: Schema.ObjectId,
     ref: 'User'
@@ -22,30 +39,33 @@ var messageSchema = new Schema({
   color: String
 });
 
-messageSchema.methods.toJSON = function() {
-  return {
-    messageId: this._id,
-    roomId: this.roomId,
-    author: this.author,
-    content: this.content,
-    createdAt: this.createdAt,
-    loc: {
-      lat: this.lat,
-      lng: this.lng
-    },
-    color: this.color
-  };
-};
-
-messageSchema.statics.fromJSON = function(jsonMessage) {
-  // will allow us to check fields before blindly saving the message to the database.
-  var Message = mongoose.model('Message');
-  return new Message(jsonMessage);
+/******************************************************************************
+ * Statics
+ */
+messageSchema.statics = {
+  fromJSON : function(jsonMessage) {
+    // will allow us to check fields before blindly saving the message to the database.
+    var Message = mongoose.model('Message');
+    return new Message(jsonMessage);
+  }
 }
 
-var Message = mongoose.model('Message', messageSchema);
-
-module.exports = {
-  schema: messageSchema,
-  model: Message
-};
+/******************************************************************************
+ * Methods
+ */
+messageSchema.methods = {
+  toJSON : function() {
+    return {
+      messageId: this._id,
+      roomId: this.roomId,
+      author: this.author,
+      content: this.content,
+      createdAt: this.createdAt,
+      loc: {
+        lat: this.lat,
+        lng: this.lng
+      },
+      color: this.color
+    };
+  }
+}
