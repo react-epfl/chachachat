@@ -4,7 +4,7 @@ function Routes(io) {
   var User = require('./controllers/user');
   var controller = {
     room: require('./controllers/room'),
-    user: new User(io)
+    user: require('./controllers/user')
   }
 
   this.onIOConnection = function(socket) {
@@ -12,6 +12,9 @@ function Routes(io) {
     report.verbose('user ' + user.username + ' connected through websocket.');
 
     report.addErrorHandling(socket);
+
+    // TODO: setDeviceToken
+    socket.on('deviceToken', controller.user.onSetDeviceToken(socket, 'deviceToken'));
 
     socket.on('fetchMessages', controller.room.onFetchMessages(socket, 'fetchMessages'));
     socket.on('createRoom', controller.room.onCreateRoom(socket, 'createRoom'));

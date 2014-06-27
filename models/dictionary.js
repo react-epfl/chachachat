@@ -1,9 +1,26 @@
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema
-  , report = require('../reporter')
-  , _ = require('underscore')
+/**
+ * Dictionary model
+ */
 
-var dictionarySchema = new Schema({
+'use strict';
+
+/******************************************************************************
+ * Module dependencies
+ */
+var app; //all application-wide things like ENV, models, config, logger, etc
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var report = require('../reporter');
+var _ = require('underscore');
+
+exports.initModel = function (myApp, opts) {
+  app = myApp;
+};
+
+/******************************************************************************
+ * Schema
+ */
+var dictionarySchema = exports.Schema = new Schema({
   phrase: {
     type: String,
     required: true,
@@ -1995,19 +2012,15 @@ var dict = [
   "easy sex"
 ];
 
+/******************************************************************************
+ * Statics
+ */
+dictionarySchema.statics = {
+  getRandomPhrases : function(number) {
+    // TODO: instead use a mongodb query to select randomly from the db
+    var shuffledDict = _.shuffle(dict);
+    var randomPhrases = _.first(shuffledDict, number);
 
-dictionarySchema.statics.getRandomPhrases = function(number) {
-
-  // TODO: instead use a mongodb query to select randomly from the db
-  var shuffledDict = _.shuffle(dict);
-  var randomPhrases = _.first(shuffledDict, number);
-
-  return randomPhrases;
-};
-
-var Dictionary = mongoose.model('Dictionary', dictionarySchema);
-
-module.exports = {
-  schema: dictionarySchema,
-  model: Dictionary
+    return randomPhrases;
+  }
 }
