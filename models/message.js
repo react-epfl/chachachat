@@ -59,17 +59,19 @@ messageSchema.statics = {
  */
 messageSchema.methods = {
   toJSON : function() {
-    return {
+    var jsonMessage = {
       messageId: this._id,
       roomId: this.roomId,
       author: this.author,
       content: this.content,
       createdAt: this.createdAt,
-      loc: {
-        lat: this.lat,
-        lng: this.lng
+      geo: {
+        locality: this.geo.locality,
+        country: this.geo.country
       },
       color: this.color
     };
+
+    return jsonMessage;
   }
 }
