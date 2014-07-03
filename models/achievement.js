@@ -30,7 +30,7 @@ var achievementSchema = exports.Schema = new Schema({
  * Statics
  */
 achievementSchema.statics = {
-  checkAndNotify : function(user, achName, achLevels, curValue, cb) {
+  check : function(user, achName, achLevels, curValue, cb) {
     if (!user.achievements) return; // a dirty hack since sometimes this field is undefined
 
     var newLevel = 0; // the achievement was not assigned yet
@@ -44,6 +44,7 @@ achievementSchema.statics = {
     }
 
     // check if the new level was reached
+    // TODO: user.achievementForName only once
     var curLevel = user.achievementForName(achName).level;
     var isNewAchievement = !user.achievementForName(achName) // there was no such an achievement
       || newLevel > curLevel;            // the achievement has reached a new level;
@@ -67,8 +68,8 @@ achievementSchema.statics = {
         });
       }
 
-      user.save(function(err) {
-        report.log('user: ' + user.username + '; error while saving achievement level');
+      user.save(function(err, savedUser) {
+        if (err) report.error('Error while saving achievement level for user: ' + user.username);
 
         var newAchievementObj = {
           name: achName,
@@ -77,9 +78,11 @@ achievementSchema.statics = {
           untilNext: untilNext,
         };
 
-        cb(newAchievementObj);
+        cb(savedUser, newAchievementObj);
       });
     }
+
+    cb(user, null);
   }
 }
 

@@ -134,12 +134,16 @@ roomSchema.methods = {
     this.save(function(err, room) {
       if (err) { return cb(err) };
 
-      // update access times
-      room.updateAccess(message.author, function(err) { if (err) report.error(err); });
+      // update last access time
+      room.updateAccess(message.author, function(err) {
+        if (err) report.error(err);
+      });
 
       // update messages received and sent count
       room.memberships.forEach(function(membership) {
-        var memberId = membership.userId;
+        // TODO: to make it clean, population should happen here
+        var memberId = membership.userId.id; // userid was populated before
+
         app.User.findById(memberId, function(err, user) {
           if (err) {
             return report.error(err);
@@ -163,7 +167,16 @@ roomSchema.methods = {
 
           user.phrases = _.union(user.phrases, newPhrases);
 
-          user.save(function(err) { if (err) report.error(err); });
+          user.save(function(err) {
+            if (err) report.error(err);
+
+            app.User.checkAchievementsAndNotify(user);
+
+            // TODO: Globetrotter // triggers for # phrases recieved from different countries
+            // TODO: Pony Express // triggers for # phrases sent to different countries
+
+            // TODO: log message sent activity
+          });
         });
       });
 

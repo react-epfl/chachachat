@@ -36,6 +36,10 @@ var messageSchema = exports.Schema = new Schema({
     lat: Number,
     lng: Number
   },
+  geo: {
+    locality: String,
+    country: String
+  },
   color: String
 });
 
