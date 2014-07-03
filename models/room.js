@@ -133,7 +133,6 @@ roomSchema.methods = {
 
     this.save(function(err, room) {
       if (err) { return cb(err) };
-
       // update last access time
       room.updateAccess(message.author, function(err) {
         if (err) report.error(err);
