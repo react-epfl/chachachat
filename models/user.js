@@ -11,8 +11,7 @@ var async = require('async');
 var _ = require('underscore');
 var Schema = mongoose.Schema;
 var report = require('../reporter');
-var achievementSchema = require('./achievement').schema;
-var Dictionary = require('./dictionary').model;
+var achievementSchema = require('./achievement').Schema;
 
 exports.initModel = function (myApp, opts) {
   app = myApp;
@@ -37,7 +36,7 @@ var userSchema = exports.Schema = new Schema({
   profile: {
     gender: {
       type: String,
-      enum: ['male', 'female', 'other']
+      enum: ['female', 'male', 'other']
     },
     age: {
       type: String,
@@ -201,8 +200,13 @@ var userSchema = exports.Schema = new Schema({
 /******************************************************************************
  * Hooks
  */
+
+/******************************************************************************
+ * Statics
+ */
+userSchema.statics = {
   // TODO: should be an instance method
-  var socketsForUser = function(user) {
+  socketsForUser : function(user) {
     report.debug('getting sockets from ' + user._id.toString());
 
     return app.io.sockets.clients().filter(function(socket) {
@@ -219,89 +223,88 @@ var userSchema = exports.Schema = new Schema({
 
       return matches;
     });
-  };
+  },
 
+  /**
+   * Notify user about new achievement
+   */
+  notifyUserAchievement : function(user, newAchievementObj) {
+    if (newAchievementObj) {
+      app.User.socketsForUser(user).forEach(function(socket) {
+        socket.emit('newAchievement', newAchievementObj);
+      });
+    }
+  },
 
-/* triggers for # sent achievement */
-userSchema.post('save', function(user) {
-  var achName = 'Big Mouth';
-  var sentAchLevels = [1, 10, 50, 100, 300, 1000, 5000];
-  var curValue = user.msgSentCount;
+  // TODO: convert into an instance method
+  /**
+   * Check if new achievement were obtained by user and notify her
+   */
+  checkAchievementsAndNotify : function (user) {
+    // on each step we check one achievement, update the user object
+    // and notify the client about new achievements
+    async.waterfall([
+      function(callback){
+        // checking Big Mouth
+        var achName = 'Big Mouth';
+        var sentAchLevels = [1, 10, 50, 100, 300, 500, 1000, 2000, 5000, 10000];
+        var curValue = user.msgSentCount;
 
-  report.debug('a user was saved: ' + user._id);
+        app.Achievement.check(user, achName, sentAchLevels, curValue,
+          function(user, newAchievementObj) {
+            app.User.notifyUserAchievement(user, newAchievementObj);
+            callback(null, user);
+          });
+      },
 
-  app.Achievement.checkAndNotify(user, achName, sentAchLevels, curValue, function(newAchievementObj) {
-    socketsForUser(user).forEach(function(socket) {
-      socket.emit('newAchievement', newAchievementObj);
+      function(user, callback){
+        // checking Talk To Me
+        var achName = 'Talk To Me';
+        var receivedAchievementLevels = [1, 10, 50, 100, 300, 500, 1000, 2000, 5000, 10000];
+        var curValue = user.msgReceivedCount;
+
+        app.Achievement.check(user, achName, receivedAchievementLevels, curValue,
+          function(user, newAchievementObj) {
+            app.User.notifyUserAchievement(user, newAchievementObj);
+            callback(null, user);
+          });
+      },
+
+      function(user, callback){
+        // checking Cool Kid
+        var achName = 'Cool Kid';
+        var receivedAchievementLevels =  [1, 5, 10, 20, 30, 40, 50, 100, 200, 500];
+        var curValue = user.roomsCount;
+
+        app.Achievement.check(user, achName, receivedAchievementLevels, curValue,
+          function(user, newAchievementObj) {
+            app.User.notifyUserAchievement(user, newAchievementObj);
+            callback(null, user);
+          });
+      },
+
+      function(user, callback){
+        // checking Mee Speak Good
+        // TODO: log an error that there are no phrases
+        if (!user.phrases) return; // when phrases are not defined for some reason
+
+        var achName = 'Me Speak Good';
+        var phrasesAchievementSteps = [15, 30, 50, 100, 200, 300, 500, 1000, 2000, 5000];
+        var curValue = user.phrases.length;
+
+        app.Achievement.check(user, achName, phrasesAchievementSteps, curValue,
+         function(user, newAchievementObj) {
+            app.User.notifyUserAchievement(user, newAchievementObj);
+            callback(null, user);
+          });
+      }
+    ], function (err, user) {
+       if (err) report.error(err);
     });
-  });
-});
 
-/* triggers for # received achievement */
-userSchema.post('save', function(user, maybe, third) {
-  var achName = 'Talk To Me';
-  var receivedAchievementLevels = [1, 10, 50, 100, 300, 1000, 5000];
-  var curValue = user.msgReceivedCount;
-
-  app.Achievement.checkAndNotify(user, achName, receivedAchievementLevels, curValue, function(newAchievementObj) {
-    socketsForUser(user).forEach(function(socket) {
-      socket.emit('newAchievement', newAchievementObj);
-    });
-  });
-});
-
-/* triggers for # of rooms/friends */
-userSchema.post('save', function(user, maybe, third) {
-  var achName = 'Cool Kid';
-  var receivedAchievementLevels = [1, 10, 50, 100, 300, 1000, 5000];
-  var curValue = user.roomsCount;
-
-  app.Achievement.checkAndNotify(user, achName, receivedAchievementLevels, curValue, function(newAchievementObj) {
-    socketsForUser(user).forEach(function(socket) {
-      socket.emit('newAchievement', newAchievementObj);
-    });
-  });
-});
-
-/* triggers for # phrases */
-userSchema.post('save', function(user, maybe, third) {
-  if (!user.phrases) return; // a dirty hack when phrases are not defined
-
-  var achName = 'Me Speak Good';
-  var phrasesAchievementSteps = [20, 30, 50, 100, 300, 1000, 5000];
-  var curValue = user.phrases.length;
-
-  app.Achievement.checkAndNotify(user, achName, phrasesAchievementSteps, curValue, function(newAchievementObj) {
-    socketsForUser(user).forEach(function(socket) {
-      socket.emit('newAchievement', newAchievementObj);
-    });
-  });
-});
-
-// TODO: hooks should be moved into the User model
-// TODO: maybe we should not use hooks since this code is executed on every user change
-/* triggers for # phrases recieved from different countries */
-userSchema.post('save', function(user, maybe, third) {
-  var achName = 'Globetrotter';
-  var receivedAchievementSteps = [1, 10, 50, 100, 300, 1000, 5000];
-
-  // TODO: think how to actually implement it
-  // app.Achievement.checkAndNotify(user, achName, sentAchLevels, curValue);
-});
-
-/* triggers for # phrases sent to different countries */
-userSchema.post('save', function(user, maybe, third) {
-  var achName = 'Pony Express';
-  var receivedAchievementSteps = [1, 10, 50, 100, 300, 1000, 5000];
-
-  // TODO: think how to actually implement it
-  // app.Achievement.checkAndNotify(user, achName, sentAchLevels, curValue);
-});
-
-/******************************************************************************
- * Statics
- */
-userSchema.statics = {
+    // TODO: Globetrotter // triggers for # phrases recieved from different countries
+    // TODO: Pony Express // triggers for # phrases sent to different countries
+  },
 
   // TODO: we should already have the user loaded at this point
   setDeviceToken : function(userId, deviceToken, cb) {
@@ -381,8 +384,8 @@ userSchema.statics = {
     app.User.findById(userId, function (err, user) {
       if (err) return cb(err);
 
-      // TODO: should be in the db independantly for each achievement type
-      var achLevels = [1, 10, 50, 100, 300, 1000, 5000];
+      // TODO: achLevels should be stored somewhere (DB?), keep DRY
+      var achLevels;
 
       var userAchievements = [];
       var name, desc, level, value, untilNext;
@@ -395,19 +398,22 @@ userSchema.statics = {
 
         switch(achievement.name) {
           case 'Big Mouth':
+            achLevels = [1, 10, 50, 100, 300, 500, 1000, 2000, 5000, 10000];
             value = user.msgSentCount;
           break;
 
           case 'Talk To Me':
+            achLevels = [1, 10, 50, 100, 300, 500, 1000, 2000, 5000, 10000];
             value = user.msgReceivedCount;
           break;
 
           case 'Cool Kid':
+            achLevels = [1, 5, 10, 20, 30, 40, 50, 100, 200, 500];
             value = user.roomsCount;
           break;
 
           case 'Me Speak Good':
-            achLevels = [20, 30, 50, 100, 300, 1000, 5000];;
+            achLevels = [15, 30, 50, 100, 200, 300, 500, 1000, 2000, 5000];
             value = user.phrases.length;
           break;
         }
@@ -552,15 +558,17 @@ userSchema.methods = {
   },
 
   achievementForName : function(name) {
+    var achievement = null;
+
+    // TODO: use hash instead of array to avoid this lookup
     if (this.achievements) {
       for (var i = 0; i < this.achievements.length; ++i) {
-        report.debug('looking at achievement ' + JSON.stringify(this.achievements[i]));
 
         if (this.achievements[i].name.toString() === name) {
-          return this.achievements[i];
+          achievement = this.achievements[i];
         }
       }
     }
-    return null;
+    return achievement;
   }
 }
