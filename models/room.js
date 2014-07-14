@@ -130,6 +130,7 @@ roomSchema.methods = {
 
   addMessage: function(message, cb) {
     this.messages.push(message);
+    this.color = message.color; // the user will have a color of the last sent message
 
     this.save(function(err, room) {
       if (err) { return cb(err) };
@@ -157,11 +158,10 @@ roomSchema.methods = {
             user.msgSentCount += 1;
           } else {
             user.msgReceivedCount += 1;
-            user.color = message.color;
           }
 
           var newPhrases = _.filter(message.content, function(phrase) {
-            return phrase !== "";
+            return phrase !== '';
           })
 
           user.phrases = _.union(user.phrases, newPhrases);
@@ -170,11 +170,9 @@ roomSchema.methods = {
             if (err) report.error(err);
 
             app.User.checkAchievementsAndNotify(user);
-
-            // TODO: Globetrotter // triggers for # phrases recieved from different countries
-            // TODO: Pony Express // triggers for # phrases sent to different countries
-
-            // TODO: log message sent activity
+            if (memberId.toString() !== message.author.toString()) {
+              app.Action.create(message.author, 'send', message, user);
+            }
           });
         });
       });
