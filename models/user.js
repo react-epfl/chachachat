@@ -33,6 +33,7 @@ var userSchema = exports.Schema = new Schema({
   },
   token: String,
   color: {type: String, default: '#E45E9D'},
+  explicit: {type: Boolean, default: false},
   profile: {
     gender: {
       type: String,
@@ -341,7 +342,7 @@ userSchema.statics = {
 
       // initialise the user dictionary if it is empty
       if (!user.phrases || user.phrases.length === 0) {
-        user.phrases = app.Dictionary.getRandomPhrases(10);
+        user.phrases = app.Dictionary.getRandomPhrases(10, user.explicit);
         return user.save(cb(err, profileChars));
       }
 
@@ -363,9 +364,27 @@ userSchema.statics = {
         }
       }
 
+      user.explicit = app.User.isExplicit(user);
+
+
       // TODO: error logging and handling
       user.save(cb);
     })
+  },
+
+  // TODO: convert into an instance method
+  isExplicit : function (user) {
+    var isExplicit = false;
+
+    var explicitInterest = _.contains(['oral sex', 'one night stands', 'nice sexy feet',
+      'sex', 'well built men'], user.profile.interests);
+    var explicitLookingFor = _.contains(['a partner in crime', 'bondage', 'cosy nights', 'cuddling',
+      'drama', 'love', 'massages', 'men', 'the time of my life', 'thrills', 'whip',
+      'women'], user.profile.lookingFor);
+
+    var isExplicit = explicitInterest || explicitLookingFor;
+
+    return isExplicit;
   },
 
   // TODO: convert into an instance method
