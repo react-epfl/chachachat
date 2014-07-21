@@ -340,12 +340,6 @@ userSchema.statics = {
         profileChars.push(profileChar);
       }
 
-      // initialise the user dictionary if it is empty
-      if (!user.phrases || user.phrases.length === 0) {
-        user.phrases = app.Dictionary.getRandomPhrases(10, user.explicit);
-        return user.save(cb(err, profileChars));
-      }
-
       cb(err, profileChars);
     })
   },
@@ -366,7 +360,6 @@ userSchema.statics = {
 
       user.explicit = app.User.isExplicit(user);
 
-
       // TODO: error logging and handling
       user.save(cb);
     })
@@ -374,8 +367,6 @@ userSchema.statics = {
 
   // TODO: convert into an instance method
   isExplicit : function (user) {
-    var isExplicit = false;
-
     var explicitInterest = _.contains(['oral sex', 'one night stands', 'nice sexy feet',
       'sex', 'well built men'], user.profile.interests);
     var explicitLookingFor = _.contains(['a partner in crime', 'bondage', 'cosy nights', 'cuddling',
@@ -389,11 +380,18 @@ userSchema.statics = {
 
   // TODO: convert into an instance method
   getUserPhrases : function (userId, cb) {
-  // TODO: for some reason it is called even before the profileChars are set during registration
     app.User.findById(userId, function (err, user) {
       if (err) return cb(err);
 
-      cb(err, user.phrases);
+      // initialise the user dictionary if it is empty
+      if (!user.phrases || user.phrases.length === 0) {
+        user.phrases = app.Dictionary.getRandomPhrases(10, user.explicit);
+        user.save(function(err, savedUser) {
+          cb(err, savedUser.phrases);
+        });
+      } else {
+        cb(err, user.phrases);
+      }
     });
   },
 

@@ -7,7 +7,7 @@
 /******************************************************************************
  * Module dependencies
  */
-var app //all application-wide things like ENV, config, logger, etc
+var app; //all application-wide things like ENV, config, logger, etc
 var apn = require('apn');
 var report = require('../reporter');
 
