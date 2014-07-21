@@ -22,7 +22,7 @@ var app = express();
 var sessionSecret = 'chachachat-application';
 
 // Redis session store
-sessionStore = new RedisStore({
+var sessionStore = new RedisStore({
   host: 'localhost'
 });
 
@@ -84,7 +84,7 @@ var camelize = function (underscored, upcaseFirstLetter) {
     res += part[0].toUpperCase() + part.substr(1);
   });
   return upcaseFirstLetter ? res : res[0].toLowerCase() + res.substr(1);
-}
+};
 
 var modelsDir = './models/';
 fs.readdirSync(modelsDir).forEach(function(file) {
@@ -138,7 +138,7 @@ passport.deserializeUser(function(id, done) {
 });
 
 // development only
-if ('development' == app.get('env')) {
+if (app.get('env') === 'development') {
   app.use(express.errorHandler());
 }
 
@@ -152,7 +152,7 @@ app.get('/', function(req, res, next) {
 
 
 var apiLogin = function(req, res, next) {
-  passport.authenticate('local', function(err, user, info) {
+  passport.authenticate('local', function(err, user) {
     if (err) {
       return res.status(500).sendfile('public/login.html');
     }
