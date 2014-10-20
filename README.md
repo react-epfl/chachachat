@@ -1,4 +1,4 @@
-[![Nodejitsu Deploy Status Badges](https://webhooks.nodejitsu.com/voz/chachachat.png)](https://webops.nodejitsu.com#voz/chachachat) [![Code Climate](https://codeclimate.com/github/react-epfl/chachachat.png)](https://codeclimate.com/github/react-epfl/chachachat) [![Dependency Status](https://gemnasium.com/react-epfl/chachachat.png)](https://gemnasium.com/react-epfl/chachachat)
+[![Code Climate](https://codeclimate.com/github/react-epfl/chachachat.png)](https://codeclimate.com/github/react-epfl/chachachat) [![Dependency Status](https://gemnasium.com/react-epfl/chachachat.png)](https://gemnasium.com/react-epfl/chachachat)
 
 chachachat
 ==========
