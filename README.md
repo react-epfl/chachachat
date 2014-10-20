@@ -5,6 +5,10 @@ chachachat
 
 Chachachat is an instant messaging application, where the users can communicate with a limited set of well-defined phrases.
 
+## Contributors
+
+Originally created by [Bruno Didot](https://github.com/didot) and [Andrii Vozniuk](https://www.linkedin.com/in/vozniuk) and extened by the [contributors](https://github.com/react-epfl/chachachat/graphs/contributors).
+
 ## Protocol
 
 Chachachat used a socket.io based protocol.
