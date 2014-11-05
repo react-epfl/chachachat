@@ -11,5 +11,4 @@ Originally created by [Bruno Didot](https://github.com/didot) and [Andrii Vozniu
 
 ## Protocol
 
-Chachachat used a socket.io based protocol.
-Details can be found in protocol.md
+Chachachat uses a socket.io based protocol. Details can be found in [protocol.md](https://github.com/react-epfl/chachachat/blob/master/protocol.md)
