@@ -105,8 +105,11 @@ app.use(express.cookieParser());
 
 app.use(session({
   store: sessionStore,
-  secret: sessionSecret
+  secret: sessionSecret,
+  resave: true,
+  saveUninitialized: true
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(app.router);
@@ -209,6 +212,9 @@ app.post('/register', function(req, res, next) {
 
 var server;
 if (app.get('env') === 'production') {
+
+debugger
+
   server = http.createServer(app);
 } else {
   var credentials = {
@@ -244,5 +250,5 @@ var routes = new Routes(io);
 io.on('connection', routes.onIOConnection);
 
 server.listen(app.get('port'), function() {
-  report.log('Express server listening on port ' + app.get('port'));
+  report.info('Express server listening on port ' + app.get('port'));
 });
