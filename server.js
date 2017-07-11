@@ -209,30 +209,15 @@ app.post('/register', function(req, res, next) {
   });
 });
 
-
-var server;
-if (app.get('env') === 'production') {
-
-debugger
-
-  server = http.createServer(app);
-} else {
-  var credentials = {
-    key: fs.readFileSync('config/chachachat-key.pem'),
-    cert: fs.readFileSync('config/chachachat-cert.pem')
-  };
-  server = https.createServer(credentials, app); // to be able to test local;
-}
-
-
+var server = http.createServer(app);
 var io = socketio.listen(server);
+
 io.set('authorization', passportSocketIO.authorize({
   cookieParser: express.cookieParser,
   key: 'connect.sid',
   secret: sessionSecret,
   store: sessionStore
 }));
-
 app.io = io;
 
 // Bootstrap controllers

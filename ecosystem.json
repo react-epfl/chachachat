@@ -1,0 +1,17 @@
+{
+  "apps" : [
+    {
+      "name": "chachachat",
+      "script": "server.js",
+      "instances": 1,
+      "cwd": ((process.env.NODE_ENV === "production") ? "" : "/Users/" + process.env.USER) + "/chachachat/",
+      "max_memory_restart": "512M",
+      "log_file": ((process.env.NODE_ENV === "production") ? "" : "/Users/" + process.env.USER) + "/chachachat/log/chachachat.log",
+      "out_file": "/dev/null",
+      "error_file": ((process.env.NODE_ENV === "production") ? "" : "/Users/" + process.env.USER) + "/chachachat/log/err.log",
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "merge_logs": true,
+      "watch": false
+    }
+  ]
+}
